@@ -25,13 +25,15 @@ import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sripiranavan.authorization_server.config.TokenProperties;
+import com.sripiranavan.authorization_server.service.TokenService;
+import com.sripiranavan.authorization_server.entity.AuthorizationCode;
+import com.sripiranavan.authorization_server.entity.RefreshToken;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/oauth2")
@@ -56,11 +58,8 @@ public class ApiAuthorizationController {
     @Autowired
     private TokenProperties tokenProperties;
     
-    // In-memory storage for authorization codes (in production, use Redis or database)
-    private final Map<String, AuthorizationCodeData> authorizationCodes = new ConcurrentHashMap<>();
-    
-    // In-memory storage for refresh tokens (in production, use Redis or database)
-    private final Map<String, RefreshTokenData> refreshTokens = new ConcurrentHashMap<>();
+    @Autowired
+    private TokenService tokenService;
 
     /**
      * API-based authorization endpoint that replaces browser-based authorization
@@ -101,8 +100,8 @@ public class ApiAuthorizationController {
             String authorizationCode = "auth_code_" + UUID.randomUUID().toString().replace("-", "");
             Instant expiresAt = Instant.now().plus(tokenProperties.getAuthCodeExpirationMinutes(), ChronoUnit.MINUTES);
             
-            // Store authorization code with metadata
-            AuthorizationCodeData codeData = new AuthorizationCodeData(
+            // Store authorization code in database
+            tokenService.storeAuthorizationCode(
                 authorizationCode, 
                 request.getClientId(), 
                 authentication.getName(), 
@@ -110,7 +109,6 @@ public class ApiAuthorizationController {
                 authorizedScopes,
                 expiresAt
             );
-            authorizationCodes.put(authorizationCode, codeData);
 
             Map<String, Object> response = new HashMap<>();
             response.put("authorization_code", authorizationCode);
@@ -140,15 +138,17 @@ public class ApiAuthorizationController {
                 return createErrorResponse("unsupported_grant_type", "Only authorization_code grant type is supported by this endpoint", HttpStatus.BAD_REQUEST);
             }
 
-            // Validate authorization code
-            AuthorizationCodeData codeData = authorizationCodes.get(request.getCode());
-            if (codeData == null) {
+            // Validate authorization code from database
+            Optional<AuthorizationCode> codeOptional = tokenService.getAuthorizationCode(request.getCode(), request.getClientId());
+            if (codeOptional.isEmpty()) {
                 return createErrorResponse("invalid_grant", "Invalid or expired authorization code", HttpStatus.BAD_REQUEST);
             }
+            
+            AuthorizationCode codeData = codeOptional.get();
 
-            // Check if code is expired
-            if (Instant.now().isAfter(codeData.getExpiresAt())) {
-                authorizationCodes.remove(request.getCode());
+            // TokenService already validates expiration, but double-check for safety
+            if (codeData.isExpired()) {
+                tokenService.consumeAuthorizationCode(request.getCode());
                 return createErrorResponse("invalid_grant", "Authorization code has expired", HttpStatus.BAD_REQUEST);
             }
 
@@ -188,15 +188,14 @@ public class ApiAuthorizationController {
                 String refreshTokenValue = "refresh_token_" + UUID.randomUUID().toString().replace("-", "");
                 Instant refreshExpiresAt = Instant.now().plus(client.getTokenSettings().getRefreshTokenTimeToLive());
                 
-                // Store refresh token data
-                RefreshTokenData refreshTokenData = new RefreshTokenData(
+                // Store refresh token in database
+                tokenService.storeRefreshToken(
                     refreshTokenValue,
                     request.getClientId(),
                     codeData.getPrincipalName(),
                     codeData.getScopes(),
                     refreshExpiresAt
                 );
-                refreshTokens.put(refreshTokenValue, refreshTokenData);
                 
                 refreshToken = new OAuth2Token() {
                     @Override
@@ -208,8 +207,8 @@ public class ApiAuthorizationController {
                 };
             }
 
-            // Remove used authorization code
-            authorizationCodes.remove(request.getCode());
+            // Remove used authorization code from database
+            tokenService.consumeAuthorizationCode(request.getCode());
 
             // Build response
             Map<String, Object> response = new HashMap<>();
@@ -239,16 +238,17 @@ public class ApiAuthorizationController {
                 return createErrorResponse("unsupported_grant_type", "Only refresh_token grant type is supported by this endpoint", HttpStatus.BAD_REQUEST);
             }
 
-            // Validate refresh token
-            RefreshTokenData refreshTokenData = refreshTokens.get(request.getRefreshToken());
-            if (refreshTokenData == null) {
+            // Validate refresh token from database
+            Optional<RefreshToken> refreshTokenOptional = tokenService.getRefreshToken(request.getRefreshToken(), request.getClientId());
+            if (refreshTokenOptional.isEmpty()) {
                 return createErrorResponse("invalid_grant", "Invalid or expired refresh token", HttpStatus.BAD_REQUEST);
             }
+            
+            RefreshToken refreshTokenData = refreshTokenOptional.get();
 
-            // Check if refresh token is expired
-            if (Instant.now().isAfter(refreshTokenData.getExpiresAt())) {
-                refreshTokens.remove(request.getRefreshToken());
-                return createErrorResponse("invalid_grant", "Refresh token has expired", HttpStatus.BAD_REQUEST);
+            // TokenService already validates expiration and active status
+            if (!refreshTokenData.isActive()) {
+                return createErrorResponse("invalid_grant", "Refresh token has expired or been used", HttpStatus.BAD_REQUEST);
             }
 
             // Validate client (if provided)
@@ -290,18 +290,17 @@ public class ApiAuthorizationController {
                 newRefreshTokenValue = "refresh_token_" + UUID.randomUUID().toString().replace("-", "");
                 final Instant newRefreshExpiresAt = Instant.now().plus(client.getTokenSettings().getRefreshTokenTimeToLive());
                 
-                // Store new refresh token data
-                RefreshTokenData newRefreshTokenData = new RefreshTokenData(
+                // Store new refresh token in database
+                tokenService.storeRefreshToken(
                     newRefreshTokenValue,
                     refreshTokenData.getClientId(),
                     refreshTokenData.getPrincipalName(),
                     refreshTokenData.getScopes(),
                     newRefreshExpiresAt
                 );
-                refreshTokens.put(newRefreshTokenValue, newRefreshTokenData);
                 
-                // Remove old refresh token
-                refreshTokens.remove(request.getRefreshToken());
+                // Mark old refresh token as used in database
+                tokenService.markRefreshTokenAsUsed(request.getRefreshToken());
             } else {
                 // Reuse the same refresh token
                 newRefreshTokenValue = request.getRefreshToken();
@@ -331,17 +330,19 @@ public class ApiAuthorizationController {
     @PostMapping("/introspect/refresh")
     public ResponseEntity<?> introspectRefreshToken(@Valid @RequestBody RefreshTokenIntrospectRequest request) {
         try {
-            RefreshTokenData refreshTokenData = refreshTokens.get(request.getRefreshToken());
+            // Get refresh token from database (includes expired/used tokens for introspection)
+            Optional<RefreshToken> refreshTokenOptional = tokenService.getRefreshTokenForIntrospection(request.getRefreshToken(), request.getClientId());
             
             Map<String, Object> response = new HashMap<>();
             
-            if (refreshTokenData == null) {
+            if (refreshTokenOptional.isEmpty()) {
                 response.put("active", false);
                 response.put("error", "Token not found");
                 return ResponseEntity.ok(response);
             }
             
-            boolean isActive = Instant.now().isBefore(refreshTokenData.getExpiresAt());
+            RefreshToken refreshTokenData = refreshTokenOptional.get();
+            boolean isActive = refreshTokenData.isActive();
             
             response.put("active", isActive);
             response.put("client_id", refreshTokenData.getClientId());
@@ -349,20 +350,55 @@ public class ApiAuthorizationController {
             response.put("scope", String.join(" ", refreshTokenData.getScopes()));
             response.put("expires_at", refreshTokenData.getExpiresAt().toString());
             response.put("expires_in", refreshTokenData.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond());
-            response.put("issued_at", refreshTokenData.getExpiresAt().minus(
-                tokenProperties.getRefreshTokenExpirationDaysForClient(refreshTokenData.getClientId()), 
-                ChronoUnit.DAYS).toString());
+            response.put("issued_at", refreshTokenData.getCreatedAt().toString());
+            response.put("used", refreshTokenData.isUsed());
             
             if (!isActive) {
-                response.put("error", "Token has expired");
-                // Clean up expired token
-                refreshTokens.remove(request.getRefreshToken());
+                if (refreshTokenData.isExpired()) {
+                    response.put("error", "Token has expired");
+                } else if (refreshTokenData.isUsed()) {
+                    response.put("error", "Token has been used");
+                }
             }
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             return createErrorResponse("server_error", "Token introspection failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Token statistics endpoint - shows current token counts and status
+     */
+    @GetMapping("/stats/tokens")
+    public ResponseEntity<?> getTokenStatistics() {
+        try {
+            TokenService.TokenStatistics stats = tokenService.getTokenStatistics();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("authorization_codes", Map.of(
+                "active", stats.getActiveAuthorizationCodes(),
+                "expired", stats.getExpiredAuthorizationCodes(),
+                "total", stats.getActiveAuthorizationCodes() + stats.getExpiredAuthorizationCodes()
+            ));
+            
+            response.put("refresh_tokens", Map.of(
+                "active", stats.getActiveRefreshTokens(),
+                "expired", stats.getExpiredRefreshTokens(),
+                "used", stats.getUsedRefreshTokens(),
+                "total", stats.getActiveRefreshTokens() + stats.getExpiredRefreshTokens() + stats.getUsedRefreshTokens()
+            ));
+            
+            response.put("storage_type", "H2 Database");
+            response.put("cleanup_enabled", true);
+            response.put("cleanup_interval", "5 minutes");
+            response.put("timestamp", Instant.now().toString());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            return createErrorResponse("server_error", "Failed to get token statistics: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -433,23 +469,28 @@ public class ApiAuthorizationController {
      */
     @GetMapping("/code/{code}/status")
     public ResponseEntity<?> getCodeStatus(@PathVariable String code) {
-        AuthorizationCodeData codeData = authorizationCodes.get(code);
+        // Note: This endpoint doesn't specify client_id, so we'll search without it
+        // In production, you might want to require client_id for better security
+        Optional<AuthorizationCode> codeOptional = tokenService.getAuthorizationCode(code, null);
         
         Map<String, Object> response = new HashMap<>();
-        if (codeData == null) {
+        if (codeOptional.isEmpty()) {
             response.put("valid", false);
-            response.put("reason", "Code not found");
-        } else if (Instant.now().isAfter(codeData.getExpiresAt())) {
-            response.put("valid", false);
-            response.put("reason", "Code expired");
-            response.put("expired_at", codeData.getExpiresAt().toString());
+            response.put("reason", "Code not found or expired");
         } else {
-            response.put("valid", true);
-            response.put("client_id", codeData.getClientId());
-            response.put("principal", codeData.getPrincipalName());
-            response.put("scopes", codeData.getScopes());
-            response.put("expires_at", codeData.getExpiresAt().toString());
-            response.put("expires_in", codeData.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond());
+            AuthorizationCode codeData = codeOptional.get();
+            if (codeData.isExpired()) {
+                response.put("valid", false);
+                response.put("reason", "Code expired");
+                response.put("expired_at", codeData.getExpiresAt().toString());
+            } else {
+                response.put("valid", true);
+                response.put("client_id", codeData.getClientId());
+                response.put("principal", codeData.getPrincipalName());
+                response.put("scopes", codeData.getScopes());
+                response.put("expires_at", codeData.getExpiresAt().toString());
+                response.put("expires_in", codeData.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond());
+            }
         }
         
         return ResponseEntity.ok(response);
