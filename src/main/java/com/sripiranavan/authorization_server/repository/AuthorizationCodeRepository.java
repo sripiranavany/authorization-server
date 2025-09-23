@@ -37,12 +37,10 @@ public interface AuthorizationCodeRepository extends JpaRepository<Authorization
     List<AuthorizationCode> findExpiredCodes(@Param("now") Instant now);
 
     /**
-     * Delete expired authorization codes
+     * Find expired authorization codes for deletion
      */
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM AuthorizationCode ac WHERE ac.expiresAt < :now")
-    int deleteExpiredCodes(@Param("now") Instant now);
+    @Query("SELECT ac FROM AuthorizationCode ac WHERE ac.expiresAt < :now")
+    List<AuthorizationCode> findExpiredCodesForDeletion(@Param("now") Instant now);
 
     /**
      * Delete authorization codes by client ID

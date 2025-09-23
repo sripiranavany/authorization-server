@@ -1,20 +1,29 @@
-# OAuth2 Authorization Server - Fully API-Based Implementation
+# OAuth2 Authorization Server
 
-A comprehensive OAuth2 Authorization Server built with Spring Boot that provides a complete API-based authentication and authorization solution.
+A production-ready OAuth2 Authorization Server built with Spring Boot 2.7.18, featuring comprehensive API-based authentication, JWT tokens, and enterprise-grade logging with Log4j2.
 
-## Features
+## 🚀 Features
 
-- **Multiple OAuth2 Grant Types**: Authorization Code, Client Credentials, Resource Owner Password Credentials, Refresh Token
-- **JWT Token Support**: RSA-signed JWT tokens with proper key management
-- **API-First Design**: All operations available through REST APIs
-- **Client Management**: Dynamic client registration and management
-- **User Management**: Complete user lifecycle management APIs
-- **Token Management**: Token introspection, validation, and revocation
-- **CORS Support**: Cross-origin resource sharing enabled for web applications
-- **Comprehensive Logging**: Detailed security and OAuth2 logging
-- **Health Monitoring**: Built-in health check and server information endpoints
+- **Complete OAuth2 Implementation**: Authorization Code, Client Credentials, Refresh Token grants
+- **JWT Token Support**: RSA-signed JWT tokens with configurable expiration
+- **API-First Design**: All operations available through REST APIs (no browser redirects required)
+- **Database-Backed Storage**: H2 database for authorization codes, refresh tokens, and users
+- **Enterprise Logging**: Log4j2 with SLF4J facade, comprehensive audit logging
+- **Production Security**: BCrypt password encoding, secure token management
+- **CORS Support**: Cross-origin resource sharing for web applications
+- **Health Monitoring**: Built-in health checks and server information endpoints
 
-## Quick Start
+## 🛠️ Technology Stack
+
+- **Framework**: Spring Boot 2.7.18
+- **Security**: Spring Security OAuth2 Authorization Server
+- **Database**: H2 (in-memory for development)
+- **Logging**: Log4j2 2.20.0 + SLF4J 1.7.36
+- **Token Format**: JWT with RSA signing
+- **Build Tool**: Maven
+- **Java Version**: 21 (compatible with Java 8+)
+
+## ⚡ Quick Start
 
 ### Prerequisites
 - Java 8 or higher
@@ -22,268 +31,333 @@ A comprehensive OAuth2 Authorization Server built with Spring Boot that provides
 
 ### Running the Server
 ```bash
-mvn spring-boot:run
+# Clone and navigate to project
+git clone <repository-url>
+cd authorization-server
+
+# Run the server
+./mvnw spring-boot:run
 ```
 
 The server will start on `http://localhost:9000`
 
-## API Documentation
-
-### Server Information
-- **GET** `/api/server/info` - Get server information and capabilities
-- **GET** `/api/server/health` - Health check endpoint
-- **GET** `/api/server/endpoints` - List all available API endpoints
-- **GET** `/api/server/well-known/openid_configuration` - OpenID Connect configuration
-
-### Authentication APIs
-- **POST** `/api/auth/login` - User login
-- **POST** `/api/auth/logout` - User logout  
-- **GET** `/api/auth/status` - Get authentication status
-
-### OAuth2 Standard Endpoints
-- **GET** `/oauth2/authorize` - Authorization endpoint (browser-based)
-- **POST** `/oauth2/token` - Token endpoint
-- **POST** `/oauth2/introspect` - Token introspection
-- **POST** `/oauth2/revoke` - Token revocation
-- **GET** `/oauth2/jwks` - JSON Web Key Set
-- **GET** `/userinfo` - User information endpoint
-
-### Fully API-Based OAuth2 Endpoints
-- **POST** `/api/oauth2/authorize` - API-based authorization (no browser needed)
-- **POST** `/api/oauth2/token-exchange` - Enhanced token exchange
-- **GET** `/api/oauth2/grant-types` - Available grant types and usage
-
-### Token Management APIs
-- **POST** `/api/oauth2/introspect` - Introspect token details
-- **POST** `/api/oauth2/revoke` - Revoke access token
-- **GET** `/api/oauth2/token/validate` - Validate token
-- **GET** `/api/oauth2/token/info` - Get token information
-
-### Client Management APIs
-- **POST** `/api/clients/register` - Register new OAuth2 client
-- **GET** `/api/clients/{clientId}` - Get client details
-- **GET** `/api/clients` - List all clients
-
-### User Management APIs
-- **POST** `/api/user-management/users` - Create new user
-- **GET** `/api/user-management/users/{username}` - Get user details
-- **GET** `/api/user-management/users` - List all users
-- **PUT** `/api/user-management/users/{username}/password` - Change user password
-- **DELETE** `/api/user-management/users/{username}` - Delete user
-
-## Usage Examples
-
-### 🔥 Fully API-Based OAuth2 Flows (No Browser Required)
-
-#### 1. Client Credentials Grant (API-to-API)
-
+### Verify Installation
 ```bash
-# Get access token - Fully API-based
-curl -X POST http://localhost:9000/oauth2/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -u "api-client:api-secret" \
-  -d "grant_type=client_credentials&scope=read write"
+# Check server health
+curl http://localhost:9000/api/server/health
+
+# Get server information
+curl http://localhost:9000/api/server/info
 ```
 
-#### 2. Resource Owner Password Credentials Grant (Mobile Apps)
+## 📚 API Documentation
 
+### 🔐 OAuth2 Endpoints
+
+#### Authorization (API-Based)
 ```bash
-# Get access token with user credentials - Fully API-based (includes refresh_token)
-curl -X POST http://localhost:9000/oauth2/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -u "mobile-client:mobile-secret" \
-  -d "grant_type=password&username=user&password=password&scope=read write"
+POST /api/oauth2/authorize
+```
+Get authorization code without browser redirects.
+
+#### Token Exchange
+```bash
+POST /api/oauth2/token
+```
+Exchange authorization codes for JWT access tokens.
+
+#### Refresh Token
+```bash
+POST /api/oauth2/refresh
+```
+Refresh expired access tokens.
+
+#### Token Introspection
+```bash
+POST /api/oauth2/introspect
+POST /api/oauth2/introspect/refresh
+```
+Validate and inspect token details.
+
+### 🔧 Token Management
+
+#### Token Validation
+```bash
+GET /api/oauth2/token/validate?token=<jwt_token>
 ```
 
-#### 3. API-Based Authorization Code Grant (No Browser Redirects)
+#### Token Information
+```bash
+GET /api/oauth2/token/info?token=<jwt_token>
+```
+
+#### Token Revocation
+```bash
+POST /api/oauth2/revoke
+```
+
+### 📊 Server Information
+
+#### Server Health
+```bash
+GET /api/server/health
+```
+
+#### Server Configuration
+```bash
+GET /api/server/info
+GET /api/server/endpoints
+GET /api/server/token-config
+```
+
+#### Grant Types Information
+```bash
+GET /api/oauth2/grant-types
+```
+
+#### Token Statistics
+```bash
+GET /api/oauth2/statistics
+```
+
+## 🎯 Usage Examples
+
+### 1. API-Based Authorization Code Flow
 
 ```bash
-# Step 1: Get authorization code via API (no browser needed)
+# Step 1: Get authorization code (no browser needed)
 curl -X POST http://localhost:9000/api/oauth2/authorize \
   -H "Content-Type: application/json" \
   -d '{
-    "clientId": "web-client",
-    "redirectUri": "http://localhost:3000/callback",
-    "username": "user",
-    "password": "password",
-    "scope": "openid profile read write",
-    "state": "xyz123"
+    "client_id": "web-client",
+    "username": "admin",
+    "password": "admin123",
+    "scope": "read write",
+    "redirect_uri": "http://localhost:3000/callback"
   }'
 
-# Response will include authorization_code
+# Response:
 # {
-#   "authorization_code": "auth_code_abc123...",
-#   "state": "xyz123",
+#   "authorization_code": "auth_code_5563c10646bc4fdea02714946676ade2",
+#   "scope": "read write",
 #   "redirect_uri": "http://localhost:3000/callback",
-#   "expires_in": 600
+#   "message": "Authorization successful - use this code to get access token",
+#   "expires_in": 60
 # }
 
-# Step 2: Exchange code for tokens (includes refresh_token)
-curl -X POST http://localhost:9000/oauth2/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -u "web-client:web-secret" \
-  -d "grant_type=authorization_code&code=auth_code_abc123...&redirect_uri=http://localhost:3000/callback"
+# Step 2: Exchange code for JWT tokens
+curl -X POST http://localhost:9000/api/oauth2/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "authorization_code",
+    "client_id": "web-client",
+    "client_secret": "web-secret",
+    "code": "auth_code_5563c10646bc4fdea02714946676ade2",
+    "redirect_uri": "http://localhost:3000/callback"
+  }'
 ```
 
-#### 4. Refresh Token Usage
+### 2. Refresh Token Flow
 
 ```bash
-# Use refresh token to get new access token
-curl -X POST http://localhost:9000/oauth2/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -u "web-client:web-secret" \
-  -d "grant_type=refresh_token&refresh_token=YOUR_REFRESH_TOKEN"
+curl -X POST http://localhost:9000/api/oauth2/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "refresh_token",
+    "client_id": "web-client",
+    "refresh_token": "refresh_token_3d0a15d23e9649dab715ca287c97218b"
+  }'
 ```
 
-### 📋 Get Available Grant Types
+### 3. Token Introspection
 
 ```bash
-# See all available grant types and their API usage
-curl -X GET http://localhost:9000/api/oauth2/grant-types
-```
-
-### 4. Token Introspection
-
-```bash
-# Introspect token
 curl -X POST http://localhost:9000/api/oauth2/introspect \
   -H "Content-Type: application/json" \
-  -d '{"token": "YOUR_ACCESS_TOKEN"}'
-```
-
-### 5. Client Registration
-
-```bash
-# Register new client
-curl -X POST http://localhost:9000/api/clients/register \
-  -H "Content-Type: application/json" \
   -d '{
-    "clientName": "My Application",
-    "grantTypes": ["authorization_code", "refresh_token"],
-    "redirectUris": ["http://localhost:8080/callback"],
-    "scopes": ["read", "write"]
+    "token": "eyJraWQiOiJmZjE3ZTk0ZC03NzQyLTQ2YWEtYjAyYS01N2QwMTNmNDRhYzIi..."
   }'
 ```
 
-### 6. User Management
+## ⚙️ Configuration
 
-```bash
-# Create new user
-curl -X POST http://localhost:9000/api/user-management/users \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "newuser",
-    "password": "password123",
-    "roles": ["USER", "ADMIN"]
-  }'
-```
+### Pre-configured OAuth2 Clients
 
-## Pre-configured Clients
+#### Web Client (Authorization Code)
+- **Client ID**: `web-client`
+- **Client Secret**: `web-secret`
+- **Grant Types**: `authorization_code`, `refresh_token`
+- **Scopes**: `openid`, `profile`, `email`, `read`, `write`
+- **Redirect URIs**: `http://localhost:3000/callback`
 
-The server comes with three pre-configured OAuth2 clients:
-
-### API Client (Client Credentials)
+#### API Client (Client Credentials)
 - **Client ID**: `api-client`
 - **Client Secret**: `api-secret`
 - **Grant Types**: `client_credentials`, `refresh_token`
 - **Scopes**: `read`, `write`, `admin`
 
-### Web Client (Authorization Code)
-- **Client ID**: `web-client`
-- **Client Secret**: `web-secret`
-- **Grant Types**: `authorization_code`, `refresh_token`
-- **Redirect URIs**: `http://localhost:3000/callback`, `http://localhost:8080/login/oauth2/code/custom`
-- **Scopes**: `openid`, `profile`, `email`, `read`, `write`
-
-### Mobile Client (Password Grant)
+#### Mobile Client (Password Grant)
 - **Client ID**: `mobile-client`
 - **Client Secret**: `mobile-secret`
 - **Grant Types**: `password`, `refresh_token`
 - **Scopes**: `read`, `write`, `openid`, `profile`
 
-## Default User
+### Default Users
 
-- **Username**: `user`
-- **Password**: `password`
-- **Roles**: `USER`
+The server comes with pre-configured users loaded from `users.yml`:
 
-## Configuration
+- **admin** / **admin123** (Roles: ADMIN, USER)
+- **api-user** / **api123** (Roles: USER)
+- **service-account** / **service123** (Roles: SERVICE)
+- **robi-operator** / **robi123** (Roles: OPERATOR, USER)
 
-The server can be configured through `application.yml`:
+### Token Configuration
 
 ```yaml
-server:
-  port: 9000
-
-spring:
-  security:
-    oauth2:
-      authorization-server:
-        jwt:
-          key-value: secret
+oauth2:
+  token:
+    # Authorization code expiration (minutes)
+    auth-code-expiration-minutes: 1
+    
+    # Default token expiration
+    access-token-expiration-minutes: 30
+    refresh-token-expiration-days: 7
+    
+    # Client-specific settings
+    clients:
+      web-client:
+        access-token-expiration-minutes: 5
+        refresh-token-expiration-days: 1
 ```
 
-## Security Features
+## 📝 Logging
 
-- **JWT Tokens**: RSA-signed JWT tokens with configurable expiration
+### Log4j2 Configuration
+
+The server uses Log4j2 with SLF4J facade for enterprise-grade logging:
+
+- **Debug Log**: `/hms/logs/authorization-server/authorization-server-debug.log`
+  - 30-minute rotation, 100MB max size
+  - Application debug information
+
+- **Audit Log**: `/hms/logs/authorization-server/authorization-server-audit.log`
+  - 10-minute rotation, 50MB max size
+  - OAuth2 request/response audit trail
+
+### Audit Logging Features
+
+- **Request/Response Logging**: Complete HTTP audit trail
+- **OAuth2 Operation Logging**: All OAuth2 flows with client details
+- **Sensitive Data Masking**: Automatic masking of tokens and credentials
+- **Structured Logging**: JSON-formatted logs for easy parsing
+
+## 🔒 Security Features
+
+- **JWT Tokens**: RSA-signed JWT tokens with proper validation
+- **BCrypt Password Encoding**: Secure password storage
+- **Token Expiration**: Configurable token lifetimes
+- **Refresh Token Rotation**: Enhanced security with token rotation
 - **CORS Support**: Configurable cross-origin resource sharing
-- **Token Validation**: Comprehensive token validation and introspection
-- **Secure Defaults**: Secure configuration out of the box
-- **Audit Logging**: Detailed security event logging
+- **Audit Trail**: Comprehensive security event logging
+- **Database Token Storage**: Secure token persistence and cleanup
 
-## Development
+## 🏗️ Architecture
+
+### Database Schema
+
+- **Users**: User accounts with roles and metadata
+- **Authorization Codes**: Temporary codes for OAuth2 flows
+- **Refresh Tokens**: Long-lived tokens for token refresh
+
+### Token Management
+
+- **Automatic Cleanup**: Scheduled cleanup of expired tokens
+- **Token Statistics**: Real-time token usage metrics
+- **Token Introspection**: Detailed token validation and information
+
+## 🚀 Development
 
 ### Building
 ```bash
-mvn clean compile
+./mvnw clean compile
 ```
 
 ### Testing
 ```bash
-mvn test
+./mvnw test
 ```
 
-### Running with Custom Profile
+### Running with Profiles
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-## Monitoring
+### Accessing H2 Console
+- URL: `http://localhost:9000/h2-console`
+- JDBC URL: `jdbc:h2:mem:authdb`
+- Username: `sa`
+- Password: `password`
 
-- **Health Check**: `GET /api/server/health`
-- **Actuator Endpoints**: `/actuator/health`, `/actuator/info`, `/actuator/metrics`
-- **H2 Console**: `http://localhost:9000/h2-console` (development only)
+## 📊 Monitoring
 
-## API Response Format
+### Health Checks
+```bash
+# Application health
+GET /api/server/health
 
-All API responses follow a consistent JSON format:
-
-### Success Response
-```json
-{
-  "data": { ... },
-  "status": "success",
-  "timestamp": 1640995200
-}
+# Spring Actuator endpoints
+GET /actuator/health
+GET /actuator/info
+GET /actuator/metrics
 ```
 
-### Error Response
-```json
-{
-  "error": "error_code",
-  "error_description": "Human readable error description",
-  "timestamp": 1640995200
-}
+### Token Statistics
+```bash
+# Get token usage statistics
+GET /api/oauth2/statistics
 ```
 
-## Contributing
+## 🔧 Production Deployment
+
+### Environment Variables
+
+```bash
+# Server configuration
+SERVER_PORT=9000
+
+# Database configuration (for production)
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/oauth2db
+SPRING_DATASOURCE_USERNAME=oauth2user
+SPRING_DATASOURCE_PASSWORD=secure_password
+
+# JWT signing key (use strong key in production)
+SPRING_SECURITY_OAUTH2_AUTHORIZATION_SERVER_JWT_KEY_VALUE=your-production-key
+```
+
+### Security Recommendations
+
+1. **Use PostgreSQL/MySQL** instead of H2 for production
+2. **Configure strong JWT signing keys**
+3. **Enable HTTPS** for all communications
+4. **Set up proper CORS policies**
+5. **Monitor audit logs** for security events
+6. **Implement rate limiting** for API endpoints
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+## 📞 Support
 
-This project is licensed under the MIT License.
+For support and questions:
+- Create an issue in the repository
+- Check the API documentation above
+- Review the audit logs for troubleshooting

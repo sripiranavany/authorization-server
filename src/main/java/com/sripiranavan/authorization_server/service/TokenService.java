@@ -142,22 +142,26 @@ public class TokenService {
      * Clean up expired authorization codes
      */
     public int cleanupExpiredAuthorizationCodes() {
-        int deletedCount = authorizationCodeRepository.deleteExpiredCodes(Instant.now());
-        if (deletedCount > 0) {
-            logger.info("Cleaned up {} expired authorization codes", deletedCount);
+        List<AuthorizationCode> codesToDelete = authorizationCodeRepository.findExpiredCodesForDeletion(Instant.now());
+        if (!codesToDelete.isEmpty()) {
+            authorizationCodeRepository.deleteAll(codesToDelete);
+            logger.info("Cleaned up {} expired authorization codes", codesToDelete.size());
+            return codesToDelete.size();
         }
-        return deletedCount;
+        return 0;
     }
 
     /**
      * Clean up expired and used refresh tokens
      */
     public int cleanupExpiredAndUsedRefreshTokens() {
-        int deletedCount = refreshTokenRepository.deleteExpiredAndUsedTokens(Instant.now());
-        if (deletedCount > 0) {
-            logger.info("Cleaned up {} expired/used refresh tokens", deletedCount);
+        List<RefreshToken> tokensToDelete = refreshTokenRepository.findExpiredAndUsedTokensForDeletion(Instant.now());
+        if (!tokensToDelete.isEmpty()) {
+            refreshTokenRepository.deleteAll(tokensToDelete);
+            logger.info("Cleaned up {} expired/used refresh tokens", tokensToDelete.size());
+            return tokensToDelete.size();
         }
-        return deletedCount;
+        return 0;
     }
 
     /**

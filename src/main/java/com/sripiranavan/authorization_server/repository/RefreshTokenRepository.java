@@ -61,28 +61,22 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
     List<RefreshToken> findUsedTokens();
 
     /**
-     * Delete expired refresh tokens
+     * Find expired refresh tokens for deletion
      */
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM RefreshToken rt WHERE rt.expiresAt < :now")
-    int deleteExpiredTokens(@Param("now") Instant now);
+    @Query("SELECT rt FROM RefreshToken rt WHERE rt.expiresAt < :now")
+    List<RefreshToken> findExpiredTokensForDeletion(@Param("now") Instant now);
 
     /**
-     * Delete used refresh tokens
+     * Find used refresh tokens for deletion
      */
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM RefreshToken rt WHERE rt.used = true")
-    int deleteUsedTokens();
+    @Query("SELECT rt FROM RefreshToken rt WHERE rt.used = true")
+    List<RefreshToken> findUsedTokensForDeletion();
 
     /**
-     * Delete expired and used refresh tokens
+     * Find expired and used refresh tokens for deletion
      */
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM RefreshToken rt WHERE rt.expiresAt < :now OR rt.used = true")
-    int deleteExpiredAndUsedTokens(@Param("now") Instant now);
+    @Query("SELECT rt FROM RefreshToken rt WHERE rt.expiresAt < :now OR rt.used = true")
+    List<RefreshToken> findExpiredAndUsedTokensForDeletion(@Param("now") Instant now);
 
     /**
      * Mark refresh token as used
