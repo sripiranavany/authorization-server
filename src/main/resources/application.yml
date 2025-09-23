@@ -110,4 +110,17 @@ oauth2:
         access-token-expiration-minutes: 15
         refresh-token-expiration-days: 1
 
-
+  server:
+    # The issuer URL for the OAuth2 authorization server
+    issuer-url: http://localhost:9000
+    
+    # Web client redirect URIs
+    web-client-redirect-uris:
+      - http://localhost:3000/callback
+      - http://localhost:8080/login/oauth2/code/custom
+      - http://localhost:3000/auth/callback
+    
+    # Mobile client redirect URIs  
+    mobile-client-redirect-uris:
+      - http://localhost:3001/callback
+      - myapp://callback

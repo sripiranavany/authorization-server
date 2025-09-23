@@ -48,6 +48,9 @@ public class AuthorizationServerConfig {
 
     @Autowired
     private TokenProperties tokenProperties;
+    
+    @Autowired
+    private ServerProperties serverProperties;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServerConfig.class);
     
@@ -119,14 +122,19 @@ public class AuthorizationServerConfig {
             .build();
 
         // Web Client for Authorization Code Grant
-        RegisteredClient webClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        RegisteredClient.Builder webClientBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
             .clientId("web-client")
             .clientSecret(passwordEncoder().encode("web-secret"))
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-            .redirectUri("http://localhost:3000/callback")
-            .redirectUri("http://localhost:8080/login/oauth2/code/custom")
+            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN);
+        
+        // Add redirect URIs from configuration
+        for (String redirectUri : serverProperties.getWebClientRedirectUris()) {
+            webClientBuilder.redirectUri(redirectUri);
+        }
+        
+        RegisteredClient webClient = webClientBuilder
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .scope(OidcScopes.EMAIL)
@@ -144,12 +152,19 @@ public class AuthorizationServerConfig {
             .build();
 
         // Mobile Client for Resource Owner Password Credentials Grant
-        RegisteredClient mobileClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        RegisteredClient.Builder mobileClientBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
             .clientId("mobile-client")
             .clientSecret(passwordEncoder().encode("mobile-secret"))
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.PASSWORD)
-            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN);
+        
+        // Add redirect URIs from configuration for mobile client
+        for (String redirectUri : serverProperties.getMobileClientRedirectUris()) {
+            mobileClientBuilder.redirectUri(redirectUri);
+        }
+        
+        RegisteredClient mobileClient = mobileClientBuilder
             .scope("read")
             .scope("write")
             .scope(OidcScopes.OPENID)
@@ -183,7 +198,7 @@ public class AuthorizationServerConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
-            .issuer("http://localhost:9000")
+            .issuer(serverProperties.getIssuerUrl())
             .authorizationEndpoint("/oauth2/authorize")
             .tokenEndpoint("/oauth2/token")
             .tokenIntrospectionEndpoint("/oauth2/introspect")
