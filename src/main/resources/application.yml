@@ -86,4 +86,28 @@ management:
     health:
       show-details: always
 
+# OAuth2 Token Configuration
+oauth2:
+  token:
+    # Authorization code expiration time (in minutes)
+    auth-code-expiration-minutes: 1
+    
+    # Access token expiration time (in minutes)
+    access-token-expiration-minutes: 30
+    
+    # Refresh token expiration time (in days)
+    refresh-token-expiration-days: 7
+    
+    # Client-specific token settings
+    clients:
+      web-client:
+        access-token-expiration-minutes: 5
+        refresh-token-expiration-days: 1
+      api-client:
+        access-token-expiration-minutes: 60
+        refresh-token-expiration-days: 1
+      mobile-client:
+        access-token-expiration-minutes: 15
+        refresh-token-expiration-days: 1
+
 

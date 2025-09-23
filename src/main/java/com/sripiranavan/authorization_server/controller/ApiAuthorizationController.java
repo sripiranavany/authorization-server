@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.server.authorization.context.Authoriz
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sripiranavan.authorization_server.config.TokenProperties;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -51,6 +52,9 @@ public class ApiAuthorizationController {
     
     @Autowired
     private JwtEncoder jwtEncoder;
+    
+    @Autowired
+    private TokenProperties tokenProperties;
     
     // In-memory storage for authorization codes (in production, use Redis or database)
     private final Map<String, AuthorizationCodeData> authorizationCodes = new ConcurrentHashMap<>();
@@ -95,7 +99,7 @@ public class ApiAuthorizationController {
 
             // Generate authorization code (simple UUID-based approach)
             String authorizationCode = "auth_code_" + UUID.randomUUID().toString().replace("-", "");
-            Instant expiresAt = Instant.now().plus(10, ChronoUnit.MINUTES);
+            Instant expiresAt = Instant.now().plus(tokenProperties.getAuthCodeExpirationMinutes(), ChronoUnit.MINUTES);
             
             // Store authorization code with metadata
             AuthorizationCodeData codeData = new AuthorizationCodeData(
@@ -112,7 +116,7 @@ public class ApiAuthorizationController {
             response.put("authorization_code", authorizationCode);
             response.put("state", request.getState());
             response.put("redirect_uri", request.getRedirectUri());
-            response.put("expires_in", 600); // 10 minutes
+            response.put("expires_in", tokenProperties.getAuthCodeExpirationMinutes() * 60); // Convert minutes to seconds
             response.put("scope", String.join(" ", authorizedScopes));
             response.put("message", "Authorization successful - use this code to get access token");
 
@@ -322,6 +326,67 @@ public class ApiAuthorizationController {
     }
 
     /**
+     * Refresh token introspection endpoint - check refresh token status and expiration
+     */
+    @PostMapping("/introspect/refresh")
+    public ResponseEntity<?> introspectRefreshToken(@Valid @RequestBody RefreshTokenIntrospectRequest request) {
+        try {
+            RefreshTokenData refreshTokenData = refreshTokens.get(request.getRefreshToken());
+            
+            Map<String, Object> response = new HashMap<>();
+            
+            if (refreshTokenData == null) {
+                response.put("active", false);
+                response.put("error", "Token not found");
+                return ResponseEntity.ok(response);
+            }
+            
+            boolean isActive = Instant.now().isBefore(refreshTokenData.getExpiresAt());
+            
+            response.put("active", isActive);
+            response.put("client_id", refreshTokenData.getClientId());
+            response.put("username", refreshTokenData.getPrincipalName());
+            response.put("scope", String.join(" ", refreshTokenData.getScopes()));
+            response.put("expires_at", refreshTokenData.getExpiresAt().toString());
+            response.put("expires_in", refreshTokenData.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond());
+            response.put("issued_at", refreshTokenData.getExpiresAt().minus(
+                tokenProperties.getRefreshTokenExpirationDaysForClient(refreshTokenData.getClientId()), 
+                ChronoUnit.DAYS).toString());
+            
+            if (!isActive) {
+                response.put("error", "Token has expired");
+                // Clean up expired token
+                refreshTokens.remove(request.getRefreshToken());
+            }
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            return createErrorResponse("server_error", "Token introspection failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Debug endpoint to show current token configuration
+     */
+    @GetMapping("/debug/config")
+    public ResponseEntity<?> getTokenConfiguration() {
+        Map<String, Object> config = new HashMap<>();
+        config.put("authCodeExpirationMinutes", tokenProperties.getAuthCodeExpirationMinutes());
+        config.put("defaultAccessTokenExpirationMinutes", tokenProperties.getAccessTokenExpirationMinutes());
+        config.put("defaultRefreshTokenExpirationDays", tokenProperties.getRefreshTokenExpirationDays());
+        
+        Map<String, Object> clientConfigs = new HashMap<>();
+        clientConfigs.put("web-client-access", tokenProperties.getAccessTokenExpirationMinutesForClient("web-client"));
+        clientConfigs.put("web-client-refresh", tokenProperties.getRefreshTokenExpirationDaysForClient("web-client"));
+        clientConfigs.put("api-client-access", tokenProperties.getAccessTokenExpirationMinutesForClient("api-client"));
+        clientConfigs.put("api-client-refresh", tokenProperties.getRefreshTokenExpirationDaysForClient("api-client"));
+        
+        config.put("clientSpecific", clientConfigs);
+        return ResponseEntity.ok(config);
+    }
+
+    /**
      * Get available grant types and their API endpoints
      */
     @GetMapping("/grant-types")
@@ -415,6 +480,21 @@ public class ApiAuthorizationController {
         public void setClientId(String clientId) { this.clientId = clientId; }
         public String getClientSecret() { return clientSecret; }
         public void setClientSecret(String clientSecret) { this.clientSecret = clientSecret; }
+    }
+
+    public static class RefreshTokenIntrospectRequest {
+        @NotBlank(message = "Refresh token is required")
+        @JsonProperty("refresh_token")
+        private String refreshToken;
+        
+        @JsonProperty("client_id")
+        private String clientId;
+        
+        // Getters and setters
+        public String getRefreshToken() { return refreshToken; }
+        public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
+        public String getClientId() { return clientId; }
+        public void setClientId(String clientId) { this.clientId = clientId; }
     }
 
     public static class AuthorizationRequest {

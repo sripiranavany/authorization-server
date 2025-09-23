@@ -1,5 +1,6 @@
 package com.sripiranavan.authorization_server.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,6 +43,9 @@ import org.slf4j.LoggerFactory;
 @Configuration
 @EnableWebSecurity
 public class AuthorizationServerConfig {
+
+    @Autowired
+    private TokenProperties tokenProperties;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServerConfig.class);
     
@@ -102,8 +106,8 @@ public class AuthorizationServerConfig {
             .scope("write")
             .scope("admin")
             .tokenSettings(TokenSettings.builder()
-                .accessTokenTimeToLive(Duration.ofHours(1))
-                .refreshTokenTimeToLive(Duration.ofDays(30))
+                .accessTokenTimeToLive(Duration.ofMinutes(tokenProperties.getAccessTokenExpirationMinutesForClient("api-client")))
+                .refreshTokenTimeToLive(Duration.ofDays(tokenProperties.getRefreshTokenExpirationDaysForClient("api-client")))
                 .reuseRefreshTokens(false)
                 .build())
             .clientSettings(ClientSettings.builder()
@@ -127,8 +131,8 @@ public class AuthorizationServerConfig {
             .scope("read")
             .scope("write")
             .tokenSettings(TokenSettings.builder()
-                .accessTokenTimeToLive(Duration.ofMinutes(30))
-                .refreshTokenTimeToLive(Duration.ofDays(7))
+                .accessTokenTimeToLive(Duration.ofMinutes(tokenProperties.getAccessTokenExpirationMinutesForClient("web-client")))
+                .refreshTokenTimeToLive(Duration.ofDays(tokenProperties.getRefreshTokenExpirationDaysForClient("web-client")))
                 .reuseRefreshTokens(false)
                 .build())
             .clientSettings(ClientSettings.builder()
@@ -149,8 +153,8 @@ public class AuthorizationServerConfig {
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .tokenSettings(TokenSettings.builder()
-                .accessTokenTimeToLive(Duration.ofMinutes(15))
-                .refreshTokenTimeToLive(Duration.ofDays(1))
+                .accessTokenTimeToLive(Duration.ofMinutes(tokenProperties.getAccessTokenExpirationMinutesForClient("mobile-client")))
+                .refreshTokenTimeToLive(Duration.ofDays(tokenProperties.getRefreshTokenExpirationDaysForClient("mobile-client")))
                 .reuseRefreshTokens(false)
                 .build())
             .clientSettings(ClientSettings.builder()
