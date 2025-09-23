@@ -7,17 +7,27 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.*;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.server.authorization.*;
+import org.springframework.security.oauth2.server.authorization.authentication.*;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
+import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/oauth2")
@@ -29,6 +39,15 @@ public class ApiAuthorizationController {
 
     @Autowired
     private RegisteredClientRepository registeredClientRepository;
+    
+    @Autowired
+    private OAuth2AuthorizationService authorizationService;
+    
+    @Autowired
+    private OAuth2TokenGenerator<?> tokenGenerator;
+    
+    // In-memory storage for authorization codes (in production, use Redis or database)
+    private final Map<String, AuthorizationCodeData> authorizationCodes = new ConcurrentHashMap<>();
 
     /**
      * API-based authorization endpoint that replaces browser-based authorization
@@ -40,18 +59,17 @@ public class ApiAuthorizationController {
             // Validate client
             RegisteredClient client = registeredClientRepository.findByClientId(request.getClientId());
             if (client == null) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "invalid_client");
-                errorResponse.put("error_description", "Client not found");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+                return createErrorResponse("invalid_client", "Client not found", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validate that client supports authorization code grant
+            if (!client.getAuthorizationGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE)) {
+                return createErrorResponse("unsupported_grant_type", "Client does not support authorization code grant", HttpStatus.BAD_REQUEST);
             }
 
             // Validate redirect URI
             if (!client.getRedirectUris().contains(request.getRedirectUri())) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "invalid_redirect_uri");
-                errorResponse.put("error_description", "Redirect URI not registered for this client");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+                return createErrorResponse("invalid_redirect_uri", "Redirect URI not registered for this client", HttpStatus.BAD_REQUEST);
             }
 
             // Authenticate user
@@ -60,98 +78,129 @@ public class ApiAuthorizationController {
             );
 
             if (!authentication.isAuthenticated()) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "invalid_credentials");
-                errorResponse.put("error_description", "Invalid username or password");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+                return createErrorResponse("invalid_credentials", "Invalid username or password", HttpStatus.UNAUTHORIZED);
             }
 
-            // Generate authorization code (simplified - in production use proper OAuth2 authorization code generation)
-            String authorizationCode = "auth_code_" + UUID.randomUUID().toString().replace("-", "");
+            // Set scopes
+            Set<String> authorizedScopes = validateAndGetScopes(request.getScope(), client.getScopes());
 
-            // In a real implementation, you would store this code with expiration and associate it with the user/client
-            // For now, we'll return it directly
+            // Generate authorization code (simple UUID-based approach)
+            String authorizationCode = "auth_code_" + UUID.randomUUID().toString().replace("-", "");
+            Instant expiresAt = Instant.now().plus(10, ChronoUnit.MINUTES);
+            
+            // Store authorization code with metadata
+            AuthorizationCodeData codeData = new AuthorizationCodeData(
+                authorizationCode, 
+                request.getClientId(), 
+                authentication.getName(), 
+                request.getRedirectUri(),
+                authorizedScopes,
+                expiresAt
+            );
+            authorizationCodes.put(authorizationCode, codeData);
 
             Map<String, Object> response = new HashMap<>();
             response.put("authorization_code", authorizationCode);
             response.put("state", request.getState());
             response.put("redirect_uri", request.getRedirectUri());
             response.put("expires_in", 600); // 10 minutes
+            response.put("scope", String.join(" ", authorizedScopes));
             response.put("message", "Authorization successful - use this code to get access token");
 
             return ResponseEntity.ok(response);
 
         } catch (AuthenticationException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "authentication_failed");
-            errorResponse.put("error_description", "Invalid credentials");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            return createErrorResponse("authentication_failed", "Invalid credentials", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "server_error");
-            errorResponse.put("error_description", "Authorization failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return createErrorResponse("server_error", "Authorization failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * API-based token exchange - enhanced version with more grant types
+     * API-based token exchange for authorization code grant
+     * This endpoint exchanges authorization codes for access tokens
      */
-    @PostMapping("/token-exchange")
-    public ResponseEntity<?> tokenExchange(@Valid @RequestBody TokenExchangeRequest request) {
+    @PostMapping("/token")
+    public ResponseEntity<?> exchangeToken(@Valid @RequestBody TokenExchangeRequest request) {
         try {
-            Map<String, Object> response = new HashMap<>();
-            
-            switch (request.getGrantType()) {
-                case "client_credentials":
-                    response.put("message", "Use standard /oauth2/token endpoint for client_credentials");
-                    response.put("endpoint", "POST /oauth2/token");
-                    break;
-                    
-                case "password":
-                    response.put("message", "Use standard /oauth2/token endpoint for password grant");
-                    response.put("endpoint", "POST /oauth2/token");
-                    break;
-                    
-                case "authorization_code":
-                    // Handle our custom authorization code exchange
-                    if (request.getCode() != null && request.getCode().startsWith("auth_code_")) {
-                        // Validate client
-                        RegisteredClient client = registeredClientRepository.findByClientId(request.getClientId());
-                        if (client == null) {
-                            response.put("error", "invalid_client");
-                            response.put("error_description", "Client not found");
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-                        }
-                        
-                        // Generate token response (simulating successful token exchange)
-                        response.put("access_token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiYXVkIjoid2ViLWNsaWVudCIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkwMDAiLCJleHAiOjE3NTg2MTQ0NTUsImlhdCI6MTc1ODYxMDg1NX0");
-                        response.put("token_type", "Bearer");
-                        response.put("expires_in", 3600);
-                        response.put("refresh_token", "refresh_token_" + UUID.randomUUID().toString().replace("-", ""));
-                        response.put("scope", "read write");
-                        return ResponseEntity.ok(response);
-                    } else {
-                        response.put("error", "invalid_grant");
-                        response.put("error_description", "Invalid or missing authorization code");
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-                    }
-                    // break; // This line is unreachable now
-                    
-                default:
-                    Map<String, Object> errorResponse = new HashMap<>();
-                    errorResponse.put("error", "unsupported_grant_type");
-                    errorResponse.put("error_description", "Grant type not supported");
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            if (!"authorization_code".equals(request.getGrantType())) {
+                return createErrorResponse("unsupported_grant_type", "Only authorization_code grant type is supported by this endpoint", HttpStatus.BAD_REQUEST);
             }
+
+            // Validate authorization code
+            AuthorizationCodeData codeData = authorizationCodes.get(request.getCode());
+            if (codeData == null) {
+                return createErrorResponse("invalid_grant", "Invalid or expired authorization code", HttpStatus.BAD_REQUEST);
+            }
+
+            // Check if code is expired
+            if (Instant.now().isAfter(codeData.getExpiresAt())) {
+                authorizationCodes.remove(request.getCode());
+                return createErrorResponse("invalid_grant", "Authorization code has expired", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validate client
+            RegisteredClient client = registeredClientRepository.findByClientId(request.getClientId());
+            if (client == null || !client.getClientId().equals(codeData.getClientId())) {
+                return createErrorResponse("invalid_client", "Invalid client for this authorization code", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validate redirect URI
+            if (!Objects.equals(request.getRedirectUri(), codeData.getRedirectUri())) {
+                return createErrorResponse("invalid_grant", "Redirect URI mismatch", HttpStatus.BAD_REQUEST);
+            }
+
+            // Create authentication for token generation
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                codeData.getPrincipalName(), null, Collections.emptyList());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Generate access token using the standard OAuth2 token endpoint approach
+            // For now, let's create a simple JWT-like token structure
+            String accessTokenValue = generateJwtToken(client, authentication, codeData.getScopes());
             
+            // Create OAuth2Token wrapper
+            OAuth2Token accessToken = new OAuth2Token() {
+                @Override
+                public String getTokenValue() { return accessTokenValue; }
+                @Override
+                public Instant getIssuedAt() { return Instant.now(); }
+                @Override
+                public Instant getExpiresAt() { return Instant.now().plus(client.getTokenSettings().getAccessTokenTimeToLive()); }
+            };
+
+            // Generate refresh token if supported
+            OAuth2Token refreshToken = null;
+            if (client.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)) {
+                String refreshTokenValue = "refresh_token_" + UUID.randomUUID().toString().replace("-", "");
+                refreshToken = new OAuth2Token() {
+                    @Override
+                    public String getTokenValue() { return refreshTokenValue; }
+                    @Override
+                    public Instant getIssuedAt() { return Instant.now(); }
+                    @Override
+                    public Instant getExpiresAt() { return Instant.now().plus(client.getTokenSettings().getRefreshTokenTimeToLive()); }
+                };
+            }
+
+            // Remove used authorization code
+            authorizationCodes.remove(request.getCode());
+
+            // Build response
+            Map<String, Object> response = new HashMap<>();
+            response.put("access_token", accessToken.getTokenValue());
+            response.put("token_type", "Bearer");
+            response.put("expires_in", getTokenExpiresIn(accessToken));
+            response.put("scope", String.join(" ", codeData.getScopes()));
+            
+            if (refreshToken != null) {
+                response.put("refresh_token", refreshToken.getTokenValue());
+            }
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "server_error");
-            errorResponse.put("error_description", "Token exchange failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return createErrorResponse("server_error", "Token exchange failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -179,7 +228,7 @@ public class ApiAuthorizationController {
         Map<String, Object> authorizationCode = new HashMap<>();
         authorizationCode.put("description", "Two-step authorization (API-based)");
         authorizationCode.put("step1", "POST /api/oauth2/authorize (get authorization code)");
-        authorizationCode.put("step2", "POST /oauth2/token (exchange code for token)");
+        authorizationCode.put("step2", "POST /api/oauth2/token (exchange code for token)");
         authorizationCode.put("fully_api_based", true);
         
         Map<String, Object> refreshToken = new HashMap<>();
@@ -195,6 +244,33 @@ public class ApiAuthorizationController {
         grantTypes.put("refresh_token", refreshToken);
         
         return ResponseEntity.ok(grantTypes);
+    }
+    
+    /**
+     * Validate authorization code status
+     */
+    @GetMapping("/code/{code}/status")
+    public ResponseEntity<?> getCodeStatus(@PathVariable String code) {
+        AuthorizationCodeData codeData = authorizationCodes.get(code);
+        
+        Map<String, Object> response = new HashMap<>();
+        if (codeData == null) {
+            response.put("valid", false);
+            response.put("reason", "Code not found");
+        } else if (Instant.now().isAfter(codeData.getExpiresAt())) {
+            response.put("valid", false);
+            response.put("reason", "Code expired");
+            response.put("expired_at", codeData.getExpiresAt().toString());
+        } else {
+            response.put("valid", true);
+            response.put("client_id", codeData.getClientId());
+            response.put("principal", codeData.getPrincipalName());
+            response.put("scopes", codeData.getScopes());
+            response.put("expires_at", codeData.getExpiresAt().toString());
+            response.put("expires_in", codeData.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond());
+        }
+        
+        return ResponseEntity.ok(response);
     }
 
     // Request DTOs
@@ -274,5 +350,102 @@ public class ApiAuthorizationController {
 
         public String getRefreshToken() { return refreshToken; }
         public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
+    }
+    
+    // Helper methods
+    private ResponseEntity<?> createErrorResponse(String error, String description, HttpStatus status) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", error);
+        errorResponse.put("error_description", description);
+        return ResponseEntity.status(status).body(errorResponse);
+    }
+    
+    private OAuth2AuthorizationRequest createAuthorizationRequest(AuthorizationRequest request, RegisteredClient client) {
+        return OAuth2AuthorizationRequest.authorizationCode()
+            .clientId(request.getClientId())
+            .redirectUri(request.getRedirectUri())
+            .scopes(validateAndGetScopes(request.getScope(), client.getScopes()))
+            .state(request.getState())
+            .build();
+    }
+    
+    private Set<String> validateAndGetScopes(String requestedScopes, Set<String> clientScopes) {
+        if (requestedScopes == null || requestedScopes.trim().isEmpty()) {
+            return clientScopes;
+        }
+        
+        Set<String> scopes = new HashSet<>(Arrays.asList(requestedScopes.split("\\s+")));
+        scopes.retainAll(clientScopes); // Only keep scopes that the client is allowed to request
+        return scopes.isEmpty() ? clientScopes : scopes;
+    }
+    
+    private OAuth2TokenContext createTokenContext(RegisteredClient client, Authentication authentication, OAuth2TokenType tokenType) {
+        return DefaultOAuth2TokenContext.builder()
+            .registeredClient(client)
+            .principal(authentication)
+            .authorizationServerContext(AuthorizationServerContextHolder.getContext())
+            .tokenType(tokenType)
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .build();
+    }
+    
+    private long getTokenExpiresIn(OAuth2Token token) {
+        if (token.getExpiresAt() != null) {
+            return token.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond();
+        }
+        return 3600; // Default 1 hour
+    }
+    
+    private String generateJwtToken(RegisteredClient client, Authentication authentication, Set<String> scopes) {
+        try {
+            // Use the token generator to create JWT
+            OAuth2TokenContext tokenContext = DefaultOAuth2TokenContext.builder()
+                .registeredClient(client)
+                .principal(authentication)
+                .authorizationServerContext(AuthorizationServerContextHolder.getContext())
+                .tokenType(OAuth2TokenType.ACCESS_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizedScopes(scopes)
+                .build();
+                
+            OAuth2Token jwtToken = tokenGenerator.generate(tokenContext);
+            if (jwtToken != null) {
+                return jwtToken.getTokenValue();
+            }
+            
+            // Fallback to a simple token format if JWT generation fails
+            return "access_token_" + UUID.randomUUID().toString().replace("-", "");
+            
+        } catch (Exception e) {
+            // Fallback to a simple token format
+            return "access_token_" + UUID.randomUUID().toString().replace("-", "");
+        }
+    }
+    
+    // Data class for storing authorization code information
+    private static class AuthorizationCodeData {
+        private final String code;
+        private final String clientId;
+        private final String principalName;
+        private final String redirectUri;
+        private final Set<String> scopes;
+        private final Instant expiresAt;
+        
+        public AuthorizationCodeData(String code, String clientId, String principalName, 
+                                   String redirectUri, Set<String> scopes, Instant expiresAt) {
+            this.code = code;
+            this.clientId = clientId;
+            this.principalName = principalName;
+            this.redirectUri = redirectUri;
+            this.scopes = scopes;
+            this.expiresAt = expiresAt;
+        }
+        
+        public String getCode() { return code; }
+        public String getClientId() { return clientId; }
+        public String getPrincipalName() { return principalName; }
+        public String getRedirectUri() { return redirectUri; }
+        public Set<String> getScopes() { return scopes; }
+        public Instant getExpiresAt() { return expiresAt; }
     }
 }
