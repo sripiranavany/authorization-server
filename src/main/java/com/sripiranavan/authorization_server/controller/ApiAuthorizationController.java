@@ -11,9 +11,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import java.util.Base64;
 import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.authentication.*;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -45,6 +47,9 @@ public class ApiAuthorizationController {
     
     @Autowired
     private OAuth2TokenGenerator<?> tokenGenerator;
+    
+    @Autowired
+    private JwtEncoder jwtEncoder;
     
     // In-memory storage for authorization codes (in production, use Redis or database)
     private final Map<String, AuthorizationCodeData> authorizationCodes = new ConcurrentHashMap<>();
@@ -398,26 +403,35 @@ public class ApiAuthorizationController {
     
     private String generateJwtToken(RegisteredClient client, Authentication authentication, Set<String> scopes) {
         try {
-            // Use the token generator to create JWT
-            OAuth2TokenContext tokenContext = DefaultOAuth2TokenContext.builder()
-                .registeredClient(client)
-                .principal(authentication)
-                .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                .tokenType(OAuth2TokenType.ACCESS_TOKEN)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizedScopes(scopes)
-                .build();
-                
-            OAuth2Token jwtToken = tokenGenerator.generate(tokenContext);
-            if (jwtToken != null) {
-                return jwtToken.getTokenValue();
-            }
+            // Create proper JWT claims
+            Instant now = Instant.now();
+            Instant expiresAt = now.plus(client.getTokenSettings().getAccessTokenTimeToLive());
             
-            // Fallback to a simple token format if JWT generation fails
-            return "access_token_" + UUID.randomUUID().toString().replace("-", "");
+            JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("http://localhost:9000")
+                .subject(authentication.getName())
+                .audience(Arrays.asList(client.getClientId()))
+                .issuedAt(now)
+                .expiresAt(expiresAt)
+                .notBefore(now)
+                .id(UUID.randomUUID().toString())
+                .claim("scope", String.join(" ", scopes))
+                .claim("client_id", client.getClientId())
+                .claim("username", authentication.getName())
+                .build();
+            
+            // Use the JwtEncoder directly to create a proper JWT token
+            JwtEncoderParameters encoderParameters = JwtEncoderParameters.from(claims);
+            org.springframework.security.oauth2.jwt.Jwt jwt = jwtEncoder.encode(encoderParameters);
+            
+            return jwt.getTokenValue();
             
         } catch (Exception e) {
-            // Fallback to a simple token format
+            // Log the error for debugging
+            System.err.println("JWT generation error: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Fallback to simple token if JWT generation fails
             return "access_token_" + UUID.randomUUID().toString().replace("-", "");
         }
     }
