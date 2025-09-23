@@ -296,4 +296,20 @@ public class AuthorizationServerConfig {
     public org.springframework.security.oauth2.jwt.JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwtEncoder(jwkSource);
     }
+    
+    @Bean
+    public org.springframework.security.authentication.AuthenticationManager authenticationManager(
+            org.springframework.security.authentication.AuthenticationProvider authenticationProvider) {
+        return new org.springframework.security.authentication.ProviderManager(Arrays.asList(authenticationProvider));
+    }
+    
+    @Bean
+    public org.springframework.security.authentication.AuthenticationProvider authenticationProvider(
+            UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        org.springframework.security.authentication.dao.DaoAuthenticationProvider provider = 
+            new org.springframework.security.authentication.dao.DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
 }
