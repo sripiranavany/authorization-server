@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <!-- Log file locations -->
+        <Property name="LOG_DIR">/hms/logs/authorization-server</Property>
+        <Property name="DEBUG_LOG_FILE">authorization-server-debug.log</Property>
+        <Property name="AUDIT_LOG_FILE">authorization-server-audit.log</Property>
+        
+        <!-- Log patterns -->
+        <Property name="DEBUG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="AUDIT_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] AUDIT %logger{36} - %msg%n</Property>
+        <Property name="CONSOLE_PATTERN">%d{HH:mm:ss.SSS} [%t] %highlight{%-5level} %style{%logger{36}}{cyan} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${CONSOLE_PATTERN}"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <!-- Debug Log File Appender with 30-minute rotation -->
+        <RollingFile name="DebugFile" fileName="${LOG_DIR}/${DEBUG_LOG_FILE}" 
+                     filePattern="${LOG_DIR}/${DEBUG_LOG_FILE}.%i.%d{yyyy-MM-dd-HH-mm}.gz">
+            <PatternLayout pattern="${DEBUG_PATTERN}"/>
+            <Policies>
+                <!-- Rotate every 30 minutes -->
+                <TimeBasedTriggeringPolicy interval="30" modulate="true"/>
+                <!-- Rotate when file reaches 100MB -->
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <!-- Keep 48 files (24 hours worth at 30-minute intervals) -->
+            <DefaultRolloverStrategy max="48">
+                <Delete basePath="${LOG_DIR}" maxDepth="1">
+                    <IfFileName glob="${DEBUG_LOG_FILE}.*"/>
+                    <IfLastModified age="24H"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- Audit Log File Appender with 10-minute rotation -->
+        <RollingFile name="AuditFile" fileName="${LOG_DIR}/${AUDIT_LOG_FILE}" 
+                     filePattern="${LOG_DIR}/${AUDIT_LOG_FILE}.%i.%d{yyyy-MM-dd-HH-mm}.gz">
+            <PatternLayout pattern="${AUDIT_PATTERN}"/>
+            <Policies>
+                <!-- Rotate every 10 minutes -->
+                <TimeBasedTriggeringPolicy interval="10" modulate="true"/>
+                <!-- Rotate when file reaches 50MB -->
+                <SizeBasedTriggeringPolicy size="50MB"/>
+            </Policies>
+            <!-- Keep 144 files (24 hours worth at 10-minute intervals) -->
+            <DefaultRolloverStrategy max="144">
+                <Delete basePath="${LOG_DIR}" maxDepth="1">
+                    <IfFileName glob="${AUDIT_LOG_FILE}.*"/>
+                    <IfLastModified age="24H"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Audit Logger - for request/response logging -->
+        <Logger name="AUDIT" level="INFO" additivity="false">
+            <AppenderRef ref="AuditFile"/>
+        </Logger>
+
+        <!-- OAuth2 Authorization Server specific loggers -->
+        <Logger name="com.sripiranavan.authorization_server" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="DebugFile"/>
+        </Logger>
+
+        <!-- Spring Security OAuth2 loggers -->
+        <Logger name="org.springframework.security.oauth2" level="DEBUG" additivity="false">
+            <AppenderRef ref="DebugFile"/>
+        </Logger>
+
+        <!-- Spring Security loggers -->
+        <Logger name="org.springframework.security" level="INFO" additivity="false">
+            <AppenderRef ref="DebugFile"/>
+        </Logger>
+
+        <!-- Database/JPA loggers -->
+        <Logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+            <AppenderRef ref="DebugFile"/>
+        </Logger>
+        
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additivity="false">
+            <AppenderRef ref="DebugFile"/>
+        </Logger>
+
+        <!-- HTTP Request/Response loggers -->
+        <Logger name="org.springframework.web" level="DEBUG" additivity="false">
+            <AppenderRef ref="DebugFile"/>
+        </Logger>
+
+        <!-- JWT Token loggers -->
+        <Logger name="com.nimbusds" level="DEBUG" additivity="false">
+            <AppenderRef ref="DebugFile"/>
+        </Logger>
+
+        <!-- Root logger -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="DebugFile"/>
+        </Root>
+    </Loggers>
+</Configuration>

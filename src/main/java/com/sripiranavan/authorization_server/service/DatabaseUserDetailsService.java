@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,45 +24,45 @@ import java.util.stream.Collectors;
 @Service("databaseUserDetailsService")
 @Transactional(readOnly = true)
 public class DatabaseUserDetailsService implements UserDetailsService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(DatabaseUserDetailsService.class);
-    
+
     @Autowired
     private UserService userService;
-    
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         logger.debug("Loading user by username: {}", username);
-        
+
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> {
                     logger.warn("User not found: {}", username);
                     return new UsernameNotFoundException("User not found: " + username);
                 });
-        
+
         logger.debug("User found: {} with roles: {}", username, user.getRoles());
-        
+
         return new DatabaseUserDetails(user);
     }
-    
+
     /**
      * Custom UserDetails implementation that wraps our User entity.
      */
     public static class DatabaseUserDetails implements UserDetails {
-        
+
         private final User user;
-        
+
         public DatabaseUserDetails(User user) {
             this.user = user;
         }
-        
+
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
             Set<String> roles = user.getRoles();
             if (roles == null || roles.isEmpty()) {
-                return Set.of();
+                return Collections.emptySet();
             }
-            
+
             return roles.stream()
                     .map(role -> {
                         // Add ROLE_ prefix if not present
@@ -70,66 +71,66 @@ public class DatabaseUserDetailsService implements UserDetailsService {
                     })
                     .collect(Collectors.toSet());
         }
-        
+
         @Override
         public String getPassword() {
             return user.getPassword();
         }
-        
+
         @Override
         public String getUsername() {
             return user.getUsername();
         }
-        
+
         @Override
         public boolean isAccountNonExpired() {
             return user.isAccountNonExpired();
         }
-        
+
         @Override
         public boolean isAccountNonLocked() {
             return user.isAccountNonLocked();
         }
-        
+
         @Override
         public boolean isCredentialsNonExpired() {
             return user.isCredentialsNonExpired();
         }
-        
+
         @Override
         public boolean isEnabled() {
             return user.isEnabled();
         }
-        
+
         /**
          * Get the underlying User entity.
-         * 
+         *
          * @return the User entity
          */
         public User getUser() {
             return user;
         }
-        
+
         /**
          * Check if user has a specific role.
-         * 
+         *
          * @param role the role to check
          * @return true if user has the role
          */
         public boolean hasRole(String role) {
             return user.hasRole(role);
         }
-        
+
         /**
          * Check if user has any of the specified roles.
-         * 
+         *
          * @param roles the roles to check
          * @return true if user has any of the roles
          */
         public boolean hasAnyRole(String... roles) {
             return user.hasAnyRole(roles);
         }
-        
+
         @Override
         public String toString() {
             return "DatabaseUserDetails{" +

@@ -82,3 +82,7 @@
 2025-09-24 00:04:42 [http-nio-9000-exec-2] DEBUG o.s.s.o.s.a.w.OAuth2ClientAuthenticationFilter - Set SecurityContextHolder authentication to OAuth2ClientAuthenticationToken
 2025-09-24 00:04:42 [http-nio-9000-exec-2] DEBUG o.s.s.w.a.i.FilterSecurityInterceptor - Authorized filter invocation [POST /oauth2/token] with attributes [authenticated]
 2025-09-24 00:04:42 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-24 00:09:18 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-24 00:09:18 [SpringApplicationShutdownHook] INFO  o.h.t.s.i.SchemaDropperImpl$DelayedDropActionImpl - HHH000477: Starting delayed evictData of schema as part of SessionFactory shut-down'
+2025-09-24 00:09:18 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-09-24 00:09:18 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

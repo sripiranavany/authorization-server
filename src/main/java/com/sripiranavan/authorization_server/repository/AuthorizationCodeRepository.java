@@ -14,28 +14,28 @@ import java.util.Optional;
 
 @Repository
 public interface AuthorizationCodeRepository extends JpaRepository<AuthorizationCode, String> {
-    
+
     /**
      * Find authorization code by code value and client ID
      */
     Optional<AuthorizationCode> findByCodeAndClientId(String code, String clientId);
-    
+
     /**
      * Find all authorization codes for a specific client
      */
     List<AuthorizationCode> findByClientId(String clientId);
-    
+
     /**
      * Find all authorization codes for a specific user
      */
     List<AuthorizationCode> findByPrincipalName(String principalName);
-    
+
     /**
      * Find all expired authorization codes
      */
     @Query("SELECT ac FROM AuthorizationCode ac WHERE ac.expiresAt < :now")
     List<AuthorizationCode> findExpiredCodes(@Param("now") Instant now);
-    
+
     /**
      * Delete expired authorization codes
      */
@@ -43,27 +43,27 @@ public interface AuthorizationCodeRepository extends JpaRepository<Authorization
     @Transactional
     @Query("DELETE FROM AuthorizationCode ac WHERE ac.expiresAt < :now")
     int deleteExpiredCodes(@Param("now") Instant now);
-    
+
     /**
      * Delete authorization codes by client ID
      */
     @Modifying
     @Transactional
     void deleteByClientId(String clientId);
-    
+
     /**
      * Delete authorization codes by principal name
      */
     @Modifying
     @Transactional
     void deleteByPrincipalName(String principalName);
-    
+
     /**
      * Count active (non-expired) codes for a client
      */
     @Query("SELECT COUNT(ac) FROM AuthorizationCode ac WHERE ac.clientId = :clientId AND ac.expiresAt > :now")
     long countActiveCodesByClientId(@Param("clientId") String clientId, @Param("now") Instant now);
-    
+
     /**
      * Count active (non-expired) codes for a user
      */

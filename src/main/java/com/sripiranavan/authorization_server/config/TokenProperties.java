@@ -1,9 +1,9 @@
 package com.sripiranavan.authorization_server.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -74,14 +74,14 @@ public class TokenProperties {
         logger.info("Auth Code Expiration: {} minutes", authCodeExpirationMinutes);
         logger.info("Default Access Token Expiration: {} minutes", accessTokenExpirationMinutes);
         logger.info("Default Refresh Token Expiration: {} days", refreshTokenExpirationDays);
-        
+
         if (!clients.isEmpty()) {
             logger.info("Client-specific settings:");
             clients.forEach((clientId, settings) -> {
-                logger.info("  {}: access={}min, refresh={}days", 
-                    clientId, 
-                    settings.getAccessTokenExpirationMinutes(), 
-                    settings.getRefreshTokenExpirationDays());
+                logger.info("  {}: access={}min, refresh={}days",
+                        clientId,
+                        settings.getAccessTokenExpirationMinutes(),
+                        settings.getRefreshTokenExpirationDays());
             });
         }
         logger.info("=====================================");

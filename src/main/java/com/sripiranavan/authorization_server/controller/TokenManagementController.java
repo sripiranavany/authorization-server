@@ -1,19 +1,14 @@
 package com.sripiranavan.authorization_server.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
-import org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionAuthenticatedPrincipal;
-import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -26,14 +21,19 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class TokenManagementController {
 
+    private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
+    private static final Logger debugLogger = LoggerFactory.getLogger("DEBUG");
+
     @Autowired
     private JwtDecoder jwtDecoder;
 
     @PostMapping("/introspect")
     public ResponseEntity<?> introspectToken(@Valid @RequestBody TokenIntrospectionRequest request) {
+        auditLogger.info("OAuth2 Token Introspection Request - Token Type: Access Token");
+
         try {
             Jwt jwt = jwtDecoder.decode(request.getToken());
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("active", true);
             response.put("client_id", jwt.getClaimAsString("client_id"));
@@ -45,7 +45,7 @@ public class TokenManagementController {
             response.put("aud", jwt.getAudience());
             response.put("iss", jwt.getIssuer().toString());
             response.put("jti", jwt.getId());
-            
+
             return ResponseEntity.ok(response);
         } catch (JwtException e) {
             Map<String, Object> response = new HashMap<>();
@@ -61,15 +61,18 @@ public class TokenManagementController {
 
     @PostMapping("/revoke")
     public ResponseEntity<?> revokeToken(@Valid @RequestBody TokenRevocationRequest request) {
+        auditLogger.info("OAuth2 Token Revocation Request - Token Type: {}",
+                request.getToken_type_hint() != null ? request.getToken_type_hint() : "access_token");
+
         try {
             // In a real implementation, you would revoke the token from your token store
             // For now, we'll just validate the token and return success
             jwtDecoder.decode(request.getToken());
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("revoked", true);
             response.put("message", "Token successfully revoked");
-            
+
             return ResponseEntity.ok(response);
         } catch (JwtException e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -88,7 +91,7 @@ public class TokenManagementController {
     public ResponseEntity<?> validateToken(@RequestParam("token") String token) {
         try {
             Jwt jwt = jwtDecoder.decode(token);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("valid", true);
             response.put("expires_at", jwt.getExpiresAt().getEpochSecond());
@@ -96,7 +99,7 @@ public class TokenManagementController {
             response.put("subject", jwt.getSubject());
             response.put("client_id", jwt.getClaimAsString("client_id"));
             response.put("scopes", jwt.getClaimAsString("scope"));
-            
+
             return ResponseEntity.ok(response);
         } catch (JwtException e) {
             Map<String, Object> response = new HashMap<>();
@@ -110,7 +113,7 @@ public class TokenManagementController {
     public ResponseEntity<?> getTokenInfo(@RequestParam("token") String token) {
         try {
             Jwt jwt = jwtDecoder.decode(token);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("token_type", "Bearer");
             response.put("subject", jwt.getSubject());
@@ -122,7 +125,7 @@ public class TokenManagementController {
             response.put("scopes", jwt.getClaimAsString("scope"));
             response.put("jti", jwt.getId());
             response.put("remaining_ttl", jwt.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond());
-            
+
             return ResponseEntity.ok(response);
         } catch (JwtException e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -136,7 +139,7 @@ public class TokenManagementController {
     public static class TokenIntrospectionRequest {
         @NotBlank(message = "Token is required")
         private String token;
-        
+
         private String token_type_hint;
 
         public String getToken() {
@@ -159,7 +162,7 @@ public class TokenManagementController {
     public static class TokenRevocationRequest {
         @NotBlank(message = "Token is required")
         private String token;
-        
+
         private String token_type_hint;
 
         public String getToken() {

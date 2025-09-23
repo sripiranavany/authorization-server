@@ -66,16 +66,20 @@ spring:
               - profile
 
 logging:
+  config: classpath:log4j2.xml
   level:
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    org.springframework.security.web: DEBUG
-    hms.tap.customer.care.auth: DEBUG
+    root: INFO
+    com.sripiranavan.authorization_server: DEBUG
+    org.springframework.security: INFO
+    org.springframework.security.oauth2: INFO
+    org.springframework.web: INFO
+    org.springframework.boot: WARN
+    org.hibernate: WARN
+  # Disable Spring Boot's default logging in favor of Log4j2
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: ""
   file:
-    name: logs/authorization-server.log
+    name: ""
 
 management:
   endpoints:
