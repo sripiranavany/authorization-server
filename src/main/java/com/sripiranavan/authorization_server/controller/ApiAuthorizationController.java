@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.sripiranavan.authorization_server.service.UserService;
+import java.util.Collections;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,6 +62,9 @@ public class ApiAuthorizationController {
     
     @Autowired
     private TokenService tokenService;
+    
+    @Autowired
+    private UserService userService;
 
     /**
      * API-based authorization endpoint that replaces browser-based authorization
@@ -84,7 +89,7 @@ public class ApiAuthorizationController {
                 return createErrorResponse("invalid_redirect_uri", "Redirect URI not registered for this client", HttpStatus.BAD_REQUEST);
             }
 
-            // Authenticate user
+            // Authenticate user using Spring Security AuthenticationManager (with database-backed UserDetailsService)
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
@@ -92,6 +97,9 @@ public class ApiAuthorizationController {
             if (!authentication.isAuthenticated()) {
                 return createErrorResponse("invalid_credentials", "Invalid username or password", HttpStatus.UNAUTHORIZED);
             }
+
+            // Update last login timestamp for the authenticated user
+            userService.updateLastLogin(authentication.getName());
 
             // Set scopes
             Set<String> authorizedScopes = validateAndGetScopes(request.getScope(), client.getScopes());
@@ -399,6 +407,19 @@ public class ApiAuthorizationController {
             
         } catch (Exception e) {
             return createErrorResponse("server_error", "Failed to get token statistics: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * User statistics endpoint - shows current user counts and status from database
+     */
+    @GetMapping("/stats/users")
+    public ResponseEntity<?> getUserStatistics() {
+        try {
+            Map<String, Object> stats = userService.getUserStatistics();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return createErrorResponse("server_error", "Failed to get user statistics: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
