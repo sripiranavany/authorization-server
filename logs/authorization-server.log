@@ -5806,3 +5806,259 @@ Consider defining a bean of type 'org.springframework.security.oauth2.jwt.JwtEnc
 2025-09-23 21:25:09 [http-nio-9000-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
 2025-09-23 21:25:09 [http-nio-9000-exec-7] DEBUG o.s.security.web.FilterChainProxy - Secured GET /error
 2025-09-23 21:25:09 [http-nio-9000-exec-7] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.security.web.FilterChainProxy - Securing GET /.well-known/jwks.json
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.security.web.FilterChainProxy - Secured GET /.well-known/jwks.json
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.security.web.FilterChainProxy - Securing GET /error
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.security.web.FilterChainProxy - Secured GET /error
+2025-09-23 21:26:33 [http-nio-9000-exec-9] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:32:28 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/authorize
+2025-09-23 21:32:28 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:32:28 [http-nio-9000-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:32:28 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/authorize
+2025-09-23 21:32:28 [http-nio-9000-exec-1] DEBUG o.s.s.a.d.DaoAuthenticationProvider - Authenticated user
+2025-09-23 21:32:28 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:32:50 [http-nio-9000-exec-3] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/token
+2025-09-23 21:32:50 [http-nio-9000-exec-3] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:32:50 [http-nio-9000-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:32:50 [http-nio-9000-exec-3] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/token
+2025-09-23 21:32:50 [http-nio-9000-exec-3] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/refresh
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/refresh
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.security.web.FilterChainProxy - Securing POST /error
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.security.web.FilterChainProxy - Secured POST /error
+2025-09-23 21:33:03 [http-nio-9000-exec-5] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:33:46 [main] INFO  c.s.a.AuthorizationServerApplication - Starting AuthorizationServerApplication using Java 21 on HMS-LP-178 with PID 92932 (/hms/development/learn/Java/authorization-server/target/classes started by sripiranavan in /hms/development/learn/Java/authorization-server)
+2025-09-23 21:33:46 [main] INFO  c.s.a.AuthorizationServerApplication - No active profile set, falling back to 1 default profile: "default"
+2025-09-23 21:33:47 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-23 21:33:47 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 36 ms. Found 1 JPA repository interfaces.
+2025-09-23 21:33:49 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 9000 (http)
+2025-09-23 21:33:49 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-09-23 21:33:49 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2025-09-23 21:33:49 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-09-23 21:33:49 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2393 ms
+2025-09-23 21:33:49 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-09-23 21:33:49 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-09-23 21:33:49 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:authdb'
+2025-09-23 21:33:49 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-23 21:33:49 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.6.15.Final
+2025-09-23 21:33:49 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-09-23 21:33:49 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+2025-09-23 21:33:50 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-09-23 21:33:50 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-23 21:33:53 [main] INFO  c.s.a.c.AuthorizationServerConfig - Registered OAuth2 clients: API Client, Web Client, Mobile Client
+2025-09-23 21:33:53 [main] INFO  c.s.a.service.FileBasedUserService - Loading users from configuration file...
+2025-09-23 21:33:53 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: admin with roles: [ADMIN, USER] into database
+2025-09-23 21:33:53 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: api-user with roles: [USER] into database
+2025-09-23 21:33:53 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: service-account with roles: [SERVICE] into database
+2025-09-23 21:33:54 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: robi-operator with roles: [OPERATOR, USER] into database
+2025-09-23 21:33:54 [main] INFO  c.s.a.service.FileBasedUserService - Successfully loaded 4 users into database from configuration file
+2025-09-23 21:33:54 [main] DEBUG o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression [authenticated] for any request
+2025-09-23 21:33:54 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer$$Lambda/0x00007884688c9790@33a58fcb with [org.springframework.security.web.session.DisableEncodeUrlFilter@36a8ebca, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@328e687e, org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.AuthorizationServerContextFilter@3ca5da54, org.springframework.security.web.context.SecurityContextPersistenceFilter@397f925e, org.springframework.security.web.header.HeaderWriterFilter@684bfba9, org.springframework.web.filter.CorsFilter@434a72f2, org.springframework.security.web.authentication.logout.LogoutFilter@5325674a, org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationServerMetadataEndpointFilter@5687ade6, org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter@40b678b3, org.springframework.security.oauth2.server.authorization.web.NimbusJwkSetEndpointFilter@4c1fed69, org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter@4718d320, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@474deb4c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6ba02f70, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5c8e7687, org.springframework.security.web.session.SessionManagementFilter@3a36da5e, org.springframework.security.web.access.ExceptionTranslationFilter@2c257c0a, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@71c69628, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter@7789526e, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenIntrospectionEndpointFilter@2512155e, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenRevocationEndpointFilter@3b9c05f]
+2025-09-23 21:33:54 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@4197e859, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@73072745, org.springframework.security.web.context.SecurityContextPersistenceFilter@550e7ef6, org.springframework.security.web.header.HeaderWriterFilter@30b29f55, org.springframework.web.filter.CorsFilter@4bdbfbc6, org.springframework.security.web.authentication.logout.LogoutFilter@2f0e7008, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7c9c7e7d, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@58701e8c, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@79735611, org.springframework.security.web.session.SessionManagementFilter@3eadfbbb, org.springframework.security.web.access.ExceptionTranslationFilter@1677f98b, org.springframework.security.web.access.intercept.AuthorizationFilter@67eabe02]
+2025-09-23 21:33:54 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-23 21:33:55 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-09-23 21:33:55 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 9000 (http) with context path ''
+2025-09-23 21:33:55 [main] INFO  c.s.a.AuthorizationServerApplication - Started AuthorizationServerApplication in 9.516 seconds (JVM running for 11.136)
+2025-09-23 21:33:55 [RMI TCP Connection(2)-127.0.0.1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-23 21:33:55 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-09-23 21:33:55 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2025-09-23 21:34:08 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/token
+2025-09-23 21:34:08 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:34:08 [http-nio-9000-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:34:08 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/token
+2025-09-23 21:34:08 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:34:15 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/authorize
+2025-09-23 21:34:15 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:34:15 [http-nio-9000-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:34:15 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/authorize
+2025-09-23 21:34:15 [http-nio-9000-exec-2] DEBUG o.s.s.a.d.DaoAuthenticationProvider - Authenticated user
+2025-09-23 21:34:15 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:34:27 [http-nio-9000-exec-4] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/token
+2025-09-23 21:34:27 [http-nio-9000-exec-4] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:34:27 [http-nio-9000-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:34:27 [http-nio-9000-exec-4] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/token
+2025-09-23 21:34:27 [http-nio-9000-exec-4] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/refresh
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/refresh
+2025-09-23 21:34:41 [http-nio-9000-exec-6] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public org.springframework.http.ResponseEntity<?> com.sripiranavan.authorization_server.controller.ApiAuthorizationController.refreshToken(com.sripiranavan.authorization_server.controller.ApiAuthorizationController$RefreshTokenRequest) with 2 errors: [Field error in object 'refreshTokenRequest' on field 'refreshToken': rejected value [null]; codes [NotBlank.refreshTokenRequest.refreshToken,NotBlank.refreshToken,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [refreshTokenRequest.refreshToken,refreshToken]; arguments []; default message [refreshToken]]; default message [Refresh token is required]] [Field error in object 'refreshTokenRequest' on field 'grantType': rejected value [null]; codes [NotBlank.refreshTokenRequest.grantType,NotBlank.grantType,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [refreshTokenRequest.grantType,grantType]; arguments []; default message [grantType]]; default message [Grant type is required]] ]
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Securing POST /error
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Secured POST /error
+2025-09-23 21:34:41 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:35:06 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-23 21:35:06 [SpringApplicationShutdownHook] INFO  o.h.t.s.i.SchemaDropperImpl$DelayedDropActionImpl - HHH000477: Starting delayed evictData of schema as part of SessionFactory shut-down'
+2025-09-23 21:35:06 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-09-23 21:35:06 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-09-23 21:35:23 [main] INFO  c.s.a.AuthorizationServerApplication - Starting AuthorizationServerApplication using Java 21.0.8 on HMS-LP-178 with PID 93309 (/hms/development/learn/Java/authorization-server/target/classes started by sripiranavan in /hms/development/learn/Java/authorization-server)
+2025-09-23 21:35:23 [main] INFO  c.s.a.AuthorizationServerApplication - No active profile set, falling back to 1 default profile: "default"
+2025-09-23 21:35:24 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-23 21:35:25 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 40 ms. Found 1 JPA repository interfaces.
+2025-09-23 21:35:25 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 9000 (http)
+2025-09-23 21:35:25 [main] INFO  o.a.c.core.AprLifecycleListener - An older version [1.2.35] of the Apache Tomcat Native library is installed, while Tomcat recommends a minimum version of [1.2.38]
+2025-09-23 21:35:25 [main] INFO  o.a.c.core.AprLifecycleListener - Loaded Apache Tomcat Native library [1.2.35] using APR version [1.7.2].
+2025-09-23 21:35:25 [main] INFO  o.a.c.core.AprLifecycleListener - APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true], UDS [true].
+2025-09-23 21:35:25 [main] INFO  o.a.c.core.AprLifecycleListener - APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+2025-09-23 21:35:25 [main] INFO  o.a.c.core.AprLifecycleListener - OpenSSL successfully initialized [OpenSSL 3.0.13 30 Jan 2024]
+2025-09-23 21:35:25 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-09-23 21:35:25 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2025-09-23 21:35:25 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-09-23 21:35:25 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1705 ms
+2025-09-23 21:35:25 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-09-23 21:35:26 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-09-23 21:35:26 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:authdb'
+2025-09-23 21:35:26 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-23 21:35:26 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.6.15.Final
+2025-09-23 21:35:26 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-09-23 21:35:26 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+2025-09-23 21:35:27 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-09-23 21:35:27 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-23 21:35:28 [main] INFO  c.s.a.c.AuthorizationServerConfig - Registered OAuth2 clients: API Client, Web Client, Mobile Client
+2025-09-23 21:35:29 [main] INFO  c.s.a.service.FileBasedUserService - Loading users from configuration file...
+2025-09-23 21:35:29 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: admin with roles: [ADMIN, USER] into database
+2025-09-23 21:35:29 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: api-user with roles: [USER] into database
+2025-09-23 21:35:29 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: service-account with roles: [SERVICE] into database
+2025-09-23 21:35:29 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: robi-operator with roles: [OPERATOR, USER] into database
+2025-09-23 21:35:29 [main] INFO  c.s.a.service.FileBasedUserService - Successfully loaded 4 users into database from configuration file
+2025-09-23 21:35:30 [main] DEBUG o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression [authenticated] for any request
+2025-09-23 21:35:30 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer$$Lambda/0x0000745408869390@3006aef5 with [org.springframework.security.web.session.DisableEncodeUrlFilter@16257f8c, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@62158618, org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.AuthorizationServerContextFilter@7ca8f5d7, org.springframework.security.web.context.SecurityContextPersistenceFilter@337e573b, org.springframework.security.web.header.HeaderWriterFilter@10660795, org.springframework.web.filter.CorsFilter@7c31e01f, org.springframework.security.web.authentication.logout.LogoutFilter@345d641e, org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationServerMetadataEndpointFilter@712213ed, org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter@571903ff, org.springframework.security.oauth2.server.authorization.web.NimbusJwkSetEndpointFilter@22bca04e, org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter@36ce9eaf, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@145f1f97, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@58d4fe33, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7945986a, org.springframework.security.web.session.SessionManagementFilter@779136bf, org.springframework.security.web.access.ExceptionTranslationFilter@12b66c89, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@1e2bc241, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter@3458be63, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenIntrospectionEndpointFilter@53b9952f, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenRevocationEndpointFilter@46df794e]
+2025-09-23 21:35:30 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@27e656e6, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3cfab56d, org.springframework.security.web.context.SecurityContextPersistenceFilter@6672b0ea, org.springframework.security.web.header.HeaderWriterFilter@18d09283, org.springframework.web.filter.CorsFilter@6b6fde93, org.springframework.security.web.authentication.logout.LogoutFilter@5a20f793, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1ccce165, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@943cf5, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@51d34f02, org.springframework.security.web.session.SessionManagementFilter@751b901a, org.springframework.security.web.access.ExceptionTranslationFilter@c8ed958, org.springframework.security.web.access.intercept.AuthorizationFilter@3751baf6]
+2025-09-23 21:35:30 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-23 21:35:30 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-09-23 21:35:30 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 9000 (http) with context path ''
+2025-09-23 21:35:30 [main] INFO  c.s.a.AuthorizationServerApplication - Started AuthorizationServerApplication in 7.287 seconds (JVM running for 7.806)
+2025-09-23 21:35:50 [http-nio-9000-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-23 21:35:50 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-09-23 21:35:50 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/authorize
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/authorize
+2025-09-23 21:35:50 [http-nio-9000-exec-1] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public org.springframework.http.ResponseEntity<?> com.sripiranavan.authorization_server.controller.ApiAuthorizationController.authorize(com.sripiranavan.authorization_server.controller.ApiAuthorizationController$AuthorizationRequest) with 2 errors: [Field error in object 'authorizationRequest' on field 'clientId': rejected value [null]; codes [NotBlank.authorizationRequest.clientId,NotBlank.clientId,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [authorizationRequest.clientId,clientId]; arguments []; default message [clientId]]; default message [Client ID is required]] [Field error in object 'authorizationRequest' on field 'redirectUri': rejected value [null]; codes [NotBlank.authorizationRequest.redirectUri,NotBlank.redirectUri,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [authorizationRequest.redirectUri,redirectUri]; arguments []; default message [redirectUri]]; default message [Redirect URI is required]] ]
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /error
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured POST /error
+2025-09-23 21:35:50 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/authorize
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/authorize
+2025-09-23 21:36:03 [http-nio-9000-exec-2] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public org.springframework.http.ResponseEntity<?> com.sripiranavan.authorization_server.controller.ApiAuthorizationController.authorize(com.sripiranavan.authorization_server.controller.ApiAuthorizationController$AuthorizationRequest) with 2 errors: [Field error in object 'authorizationRequest' on field 'redirectUri': rejected value [null]; codes [NotBlank.authorizationRequest.redirectUri,NotBlank.redirectUri,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [authorizationRequest.redirectUri,redirectUri]; arguments []; default message [redirectUri]]; default message [Redirect URI is required]] [Field error in object 'authorizationRequest' on field 'clientId': rejected value [null]; codes [NotBlank.authorizationRequest.clientId,NotBlank.clientId,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [authorizationRequest.clientId,clientId]; arguments []; default message [clientId]]; default message [Client ID is required]] ]
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing POST /error
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured POST /error
+2025-09-23 21:36:03 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:38:13 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-23 21:38:13 [SpringApplicationShutdownHook] INFO  o.h.t.s.i.SchemaDropperImpl$DelayedDropActionImpl - HHH000477: Starting delayed evictData of schema as part of SessionFactory shut-down'
+2025-09-23 21:38:13 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-09-23 21:38:13 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-09-23 21:38:27 [main] INFO  c.s.a.AuthorizationServerApplication - Starting AuthorizationServerApplication using Java 21.0.8 on HMS-LP-178 with PID 93758 (/hms/development/learn/Java/authorization-server/target/classes started by sripiranavan in /hms/development/learn/Java/authorization-server)
+2025-09-23 21:38:27 [main] INFO  c.s.a.AuthorizationServerApplication - No active profile set, falling back to 1 default profile: "default"
+2025-09-23 21:38:28 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-23 21:38:28 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 40 ms. Found 1 JPA repository interfaces.
+2025-09-23 21:38:29 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 9000 (http)
+2025-09-23 21:38:29 [main] INFO  o.a.c.core.AprLifecycleListener - An older version [1.2.35] of the Apache Tomcat Native library is installed, while Tomcat recommends a minimum version of [1.2.38]
+2025-09-23 21:38:29 [main] INFO  o.a.c.core.AprLifecycleListener - Loaded Apache Tomcat Native library [1.2.35] using APR version [1.7.2].
+2025-09-23 21:38:29 [main] INFO  o.a.c.core.AprLifecycleListener - APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true], UDS [true].
+2025-09-23 21:38:29 [main] INFO  o.a.c.core.AprLifecycleListener - APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+2025-09-23 21:38:29 [main] INFO  o.a.c.core.AprLifecycleListener - OpenSSL successfully initialized [OpenSSL 3.0.13 30 Jan 2024]
+2025-09-23 21:38:29 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-09-23 21:38:29 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2025-09-23 21:38:29 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-09-23 21:38:29 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1848 ms
+2025-09-23 21:38:29 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-09-23 21:38:29 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-09-23 21:38:29 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:authdb'
+2025-09-23 21:38:30 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-23 21:38:30 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.6.15.Final
+2025-09-23 21:38:30 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-09-23 21:38:30 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+2025-09-23 21:38:31 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-09-23 21:38:31 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-23 21:38:32 [main] INFO  c.s.a.c.AuthorizationServerConfig - Registered OAuth2 clients: API Client, Web Client, Mobile Client
+2025-09-23 21:38:32 [main] INFO  c.s.a.service.FileBasedUserService - Loading users from configuration file...
+2025-09-23 21:38:33 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: admin with roles: [ADMIN, USER] into database
+2025-09-23 21:38:33 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: api-user with roles: [USER] into database
+2025-09-23 21:38:33 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: service-account with roles: [SERVICE] into database
+2025-09-23 21:38:33 [main] INFO  c.s.a.service.FileBasedUserService - Inserted user: robi-operator with roles: [OPERATOR, USER] into database
+2025-09-23 21:38:33 [main] INFO  c.s.a.service.FileBasedUserService - Successfully loaded 4 users into database from configuration file
+2025-09-23 21:38:33 [main] DEBUG o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression [authenticated] for any request
+2025-09-23 21:38:33 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer$$Lambda/0x0000726008869390@7611e295 with [org.springframework.security.web.session.DisableEncodeUrlFilter@6d40a2b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@a7fd77f, org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.AuthorizationServerContextFilter@6cd65042, org.springframework.security.web.context.SecurityContextPersistenceFilter@3adb4cc8, org.springframework.security.web.header.HeaderWriterFilter@4df13b7e, org.springframework.web.filter.CorsFilter@49faf815, org.springframework.security.web.authentication.logout.LogoutFilter@13552290, org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationServerMetadataEndpointFilter@744199bb, org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter@689eab53, org.springframework.security.oauth2.server.authorization.web.NimbusJwkSetEndpointFilter@3a574a3b, org.springframework.security.oauth2.server.authorization.web.OAuth2ClientAuthenticationFilter@1728d307, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@f9ac719, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@53a3fc8b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3006aef5, org.springframework.security.web.session.SessionManagementFilter@67d55a46, org.springframework.security.web.access.ExceptionTranslationFilter@44723d95, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@32bae609, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter@c555e1e, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenIntrospectionEndpointFilter@574e4184, org.springframework.security.oauth2.server.authorization.web.OAuth2TokenRevocationEndpointFilter@1735e1c4]
+2025-09-23 21:38:33 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@438a65a7, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@543c887, org.springframework.security.web.context.SecurityContextPersistenceFilter@601e7c97, org.springframework.security.web.header.HeaderWriterFilter@5248c05a, org.springframework.web.filter.CorsFilter@75f446df, org.springframework.security.web.authentication.logout.LogoutFilter@6672b0ea, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@c8ed958, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@18d09283, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3751baf6, org.springframework.security.web.session.SessionManagementFilter@151f1734, org.springframework.security.web.access.ExceptionTranslationFilter@4c941d19, org.springframework.security.web.access.intercept.AuthorizationFilter@1e4b9592]
+2025-09-23 21:38:33 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-23 21:38:34 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-09-23 21:38:34 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 9000 (http) with context path ''
+2025-09-23 21:38:34 [main] INFO  c.s.a.AuthorizationServerApplication - Started AuthorizationServerApplication in 7.557 seconds (JVM running for 8.092)
+2025-09-23 21:39:05 [http-nio-9000-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-23 21:39:05 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-09-23 21:39:05 [http-nio-9000-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-09-23 21:39:05 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/authorize
+2025-09-23 21:39:05 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:39:05 [http-nio-9000-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:39:05 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/authorize
+2025-09-23 21:39:06 [http-nio-9000-exec-1] DEBUG o.s.s.a.d.DaoAuthenticationProvider - Authenticated user
+2025-09-23 21:39:06 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:39:15 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/token
+2025-09-23 21:39:15 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:39:15 [http-nio-9000-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:39:15 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/token
+2025-09-23 21:39:15 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:39:32 [http-nio-9000-exec-4] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/refresh
+2025-09-23 21:39:32 [http-nio-9000-exec-4] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:39:32 [http-nio-9000-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:39:32 [http-nio-9000-exec-4] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/refresh
+2025-09-23 21:39:32 [http-nio-9000-exec-4] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/authorize
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/authorize
+2025-09-23 21:39:55 [http-nio-9000-exec-6] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public org.springframework.http.ResponseEntity<?> com.sripiranavan.authorization_server.controller.ApiAuthorizationController.authorize(com.sripiranavan.authorization_server.controller.ApiAuthorizationController$AuthorizationRequest) with 2 errors: [Field error in object 'authorizationRequest' on field 'clientId': rejected value [null]; codes [NotBlank.authorizationRequest.clientId,NotBlank.clientId,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [authorizationRequest.clientId,clientId]; arguments []; default message [clientId]]; default message [Client ID is required]] [Field error in object 'authorizationRequest' on field 'redirectUri': rejected value [null]; codes [NotBlank.authorizationRequest.redirectUri,NotBlank.redirectUri,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [authorizationRequest.redirectUri,redirectUri]; arguments []; default message [redirectUri]]; default message [Redirect URI is required]] ]
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Securing POST /error
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.security.web.FilterChainProxy - Secured POST /error
+2025-09-23 21:39:55 [http-nio-9000-exec-6] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:40:28 [http-nio-9000-exec-7] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/authorize
+2025-09-23 21:40:28 [http-nio-9000-exec-7] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:40:28 [http-nio-9000-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:40:28 [http-nio-9000-exec-7] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/authorize
+2025-09-23 21:40:28 [http-nio-9000-exec-7] DEBUG o.s.s.a.d.DaoAuthenticationProvider - Authenticated user
+2025-09-23 21:40:28 [http-nio-9000-exec-7] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:40:58 [http-nio-9000-exec-9] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/token
+2025-09-23 21:40:58 [http-nio-9000-exec-9] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:40:58 [http-nio-9000-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:40:58 [http-nio-9000-exec-9] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/token
+2025-09-23 21:40:58 [http-nio-9000-exec-9] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:41:36 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/refresh
+2025-09-23 21:41:36 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:41:36 [http-nio-9000-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:41:36 [http-nio-9000-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/refresh
+2025-09-23 21:41:36 [http-nio-9000-exec-1] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:41:57 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/refresh
+2025-09-23 21:41:57 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:41:57 [http-nio-9000-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:41:57 [http-nio-9000-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/refresh
+2025-09-23 21:41:57 [http-nio-9000-exec-2] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request
+2025-09-23 21:42:04 [http-nio-9000-exec-4] DEBUG o.s.security.web.FilterChainProxy - Securing POST /api/oauth2/refresh
+2025-09-23 21:42:04 [http-nio-9000-exec-4] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Set SecurityContextHolder to empty SecurityContext
+2025-09-23 21:42:04 [http-nio-9000-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-23 21:42:04 [http-nio-9000-exec-4] DEBUG o.s.security.web.FilterChainProxy - Secured POST /api/oauth2/refresh
+2025-09-23 21:42:04 [http-nio-9000-exec-4] DEBUG o.s.s.w.c.SecurityContextPersistenceFilter - Cleared SecurityContextHolder to complete request

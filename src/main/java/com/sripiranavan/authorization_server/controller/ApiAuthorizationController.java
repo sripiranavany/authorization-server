@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -53,6 +54,9 @@ public class ApiAuthorizationController {
     
     // In-memory storage for authorization codes (in production, use Redis or database)
     private final Map<String, AuthorizationCodeData> authorizationCodes = new ConcurrentHashMap<>();
+    
+    // In-memory storage for refresh tokens (in production, use Redis or database)
+    private final Map<String, RefreshTokenData> refreshTokens = new ConcurrentHashMap<>();
 
     /**
      * API-based authorization endpoint that replaces browser-based authorization
@@ -178,13 +182,25 @@ public class ApiAuthorizationController {
             OAuth2Token refreshToken = null;
             if (client.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)) {
                 String refreshTokenValue = "refresh_token_" + UUID.randomUUID().toString().replace("-", "");
+                Instant refreshExpiresAt = Instant.now().plus(client.getTokenSettings().getRefreshTokenTimeToLive());
+                
+                // Store refresh token data
+                RefreshTokenData refreshTokenData = new RefreshTokenData(
+                    refreshTokenValue,
+                    request.getClientId(),
+                    codeData.getPrincipalName(),
+                    codeData.getScopes(),
+                    refreshExpiresAt
+                );
+                refreshTokens.put(refreshTokenValue, refreshTokenData);
+                
                 refreshToken = new OAuth2Token() {
                     @Override
                     public String getTokenValue() { return refreshTokenValue; }
                     @Override
                     public Instant getIssuedAt() { return Instant.now(); }
                     @Override
-                    public Instant getExpiresAt() { return Instant.now().plus(client.getTokenSettings().getRefreshTokenTimeToLive()); }
+                    public Instant getExpiresAt() { return refreshExpiresAt; }
                 };
             }
 
@@ -206,6 +222,102 @@ public class ApiAuthorizationController {
 
         } catch (Exception e) {
             return createErrorResponse("server_error", "Token exchange failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Refresh token endpoint - exchanges refresh tokens for new access tokens
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        try {
+            if (!"refresh_token".equals(request.getGrantType())) {
+                return createErrorResponse("unsupported_grant_type", "Only refresh_token grant type is supported by this endpoint", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validate refresh token
+            RefreshTokenData refreshTokenData = refreshTokens.get(request.getRefreshToken());
+            if (refreshTokenData == null) {
+                return createErrorResponse("invalid_grant", "Invalid or expired refresh token", HttpStatus.BAD_REQUEST);
+            }
+
+            // Check if refresh token is expired
+            if (Instant.now().isAfter(refreshTokenData.getExpiresAt())) {
+                refreshTokens.remove(request.getRefreshToken());
+                return createErrorResponse("invalid_grant", "Refresh token has expired", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validate client (if provided)
+            if (request.getClientId() != null) {
+                RegisteredClient client = registeredClientRepository.findByClientId(request.getClientId());
+                if (client == null || !client.getClientId().equals(refreshTokenData.getClientId())) {
+                    return createErrorResponse("invalid_client", "Invalid client for this refresh token", HttpStatus.BAD_REQUEST);
+                }
+            }
+
+            // Get client for token generation
+            RegisteredClient client = registeredClientRepository.findByClientId(refreshTokenData.getClientId());
+            if (client == null) {
+                return createErrorResponse("invalid_client", "Client not found", HttpStatus.BAD_REQUEST);
+            }
+
+            // Create authentication for token generation
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                refreshTokenData.getPrincipalName(), null, Collections.emptyList());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Generate new access token
+            String newAccessTokenValue = generateJwtToken(client, authentication, refreshTokenData.getScopes());
+            
+            OAuth2Token newAccessToken = new OAuth2Token() {
+                @Override
+                public String getTokenValue() { return newAccessTokenValue; }
+                @Override
+                public Instant getIssuedAt() { return Instant.now(); }
+                @Override
+                public Instant getExpiresAt() { return Instant.now().plus(client.getTokenSettings().getAccessTokenTimeToLive()); }
+            };
+
+            // Generate new refresh token (optional - some implementations reuse the same refresh token)
+            String newRefreshTokenValue = null;
+            
+            if (!client.getTokenSettings().isReuseRefreshTokens()) {
+                // Generate new refresh token and invalidate the old one
+                newRefreshTokenValue = "refresh_token_" + UUID.randomUUID().toString().replace("-", "");
+                final Instant newRefreshExpiresAt = Instant.now().plus(client.getTokenSettings().getRefreshTokenTimeToLive());
+                
+                // Store new refresh token data
+                RefreshTokenData newRefreshTokenData = new RefreshTokenData(
+                    newRefreshTokenValue,
+                    refreshTokenData.getClientId(),
+                    refreshTokenData.getPrincipalName(),
+                    refreshTokenData.getScopes(),
+                    newRefreshExpiresAt
+                );
+                refreshTokens.put(newRefreshTokenValue, newRefreshTokenData);
+                
+                // Remove old refresh token
+                refreshTokens.remove(request.getRefreshToken());
+            } else {
+                // Reuse the same refresh token
+                newRefreshTokenValue = request.getRefreshToken();
+            }
+
+            // Build response
+            Map<String, Object> response = new HashMap<>();
+            response.put("access_token", newAccessToken.getTokenValue());
+            response.put("token_type", "Bearer");
+            response.put("expires_in", getTokenExpiresIn(newAccessToken));
+            response.put("scope", String.join(" ", refreshTokenData.getScopes()));
+            
+            if (newRefreshTokenValue != null) {
+                response.put("refresh_token", newRefreshTokenValue);
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return createErrorResponse("server_error", "Token refresh failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -279,11 +391,39 @@ public class ApiAuthorizationController {
     }
 
     // Request DTOs
+    public static class RefreshTokenRequest {
+        @NotBlank(message = "Grant type is required")
+        @JsonProperty("grant_type")
+        private String grantType;
+        
+        @NotBlank(message = "Refresh token is required")
+        @JsonProperty("refresh_token")
+        private String refreshToken;
+        
+        @JsonProperty("client_id")
+        private String clientId;
+        
+        @JsonProperty("client_secret")
+        private String clientSecret;
+        
+        // Getters and setters
+        public String getGrantType() { return grantType; }
+        public void setGrantType(String grantType) { this.grantType = grantType; }
+        public String getRefreshToken() { return refreshToken; }
+        public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
+        public String getClientId() { return clientId; }
+        public void setClientId(String clientId) { this.clientId = clientId; }
+        public String getClientSecret() { return clientSecret; }
+        public void setClientSecret(String clientSecret) { this.clientSecret = clientSecret; }
+    }
+
     public static class AuthorizationRequest {
         @NotBlank(message = "Client ID is required")
+        @JsonProperty("client_id")
         private String clientId;
         
         @NotBlank(message = "Redirect URI is required")
+        @JsonProperty("redirect_uri")
         private String redirectUri;
         
         @NotBlank(message = "Username is required")
@@ -294,6 +434,8 @@ public class ApiAuthorizationController {
         
         private String scope;
         private String state;
+        
+        @JsonProperty("response_type")
         private String responseType = "code";
 
         // Getters and setters
@@ -321,14 +463,22 @@ public class ApiAuthorizationController {
 
     public static class TokenExchangeRequest {
         @NotBlank(message = "Grant type is required")
+        @JsonProperty("grant_type")
         private String grantType;
         
+        @JsonProperty("client_id")
         private String clientId;
+        
         private String code;
+        
+        @JsonProperty("redirect_uri")
         private String redirectUri;
+        
         private String username;
         private String password;
         private String scope;
+        
+        @JsonProperty("refresh_token")
         private String refreshToken;
 
         // Getters and setters
@@ -459,6 +609,29 @@ public class ApiAuthorizationController {
         public String getClientId() { return clientId; }
         public String getPrincipalName() { return principalName; }
         public String getRedirectUri() { return redirectUri; }
+        public Set<String> getScopes() { return scopes; }
+        public Instant getExpiresAt() { return expiresAt; }
+    }
+
+    // Data class for storing refresh token information
+    private static class RefreshTokenData {
+        private final String tokenValue;
+        private final String clientId;
+        private final String principalName;
+        private final Set<String> scopes;
+        private final Instant expiresAt;
+
+        public RefreshTokenData(String tokenValue, String clientId, String principalName, Set<String> scopes, Instant expiresAt) {
+            this.tokenValue = tokenValue;
+            this.clientId = clientId;
+            this.principalName = principalName;
+            this.scopes = scopes;
+            this.expiresAt = expiresAt;
+        }
+
+        public String getTokenValue() { return tokenValue; }
+        public String getClientId() { return clientId; }
+        public String getPrincipalName() { return principalName; }
         public Set<String> getScopes() { return scopes; }
         public Instant getExpiresAt() { return expiresAt; }
     }
