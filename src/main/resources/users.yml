@@ -1,0 +1,17 @@
+users:
+  - username: "admin"
+    password: "admin123"
+    roles: ["ADMIN", "USER"]
+    enabled: true
+  - username: "api-user"
+    password: "api123"
+    roles: ["USER"]
+    enabled: true
+  - username: "service-account"
+    password: "service123"
+    roles: ["SERVICE"]
+    enabled: true
+  - username: "robi-operator"
+    password: "robi123"
+    roles: ["OPERATOR", "USER"]
+    enabled: true
