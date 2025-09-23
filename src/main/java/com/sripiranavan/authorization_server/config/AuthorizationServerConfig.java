@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2Au
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import com.sripiranavan.authorization_server.config.OAuth2ClientProperties;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -38,6 +39,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,9 @@ public class AuthorizationServerConfig {
     
     @Autowired
     private ServerProperties serverProperties;
+    
+    @Autowired
+    private OAuth2ClientProperties oauth2ClientProperties;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServerConfig.class);
     
@@ -99,12 +106,119 @@ public class AuthorizationServerConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
+        List<RegisteredClient> clients = new ArrayList<>();
+        
+        // Dynamically create clients from application.yml configuration
+        Map<String, OAuth2ClientProperties.ClientConfig> clientConfigs = oauth2ClientProperties.getClient();
+        
+        logger.info("Found {} client configurations in application.yml", clientConfigs.size());
+        if (clientConfigs.isEmpty()) {
+            logger.warn("No client configurations found! Falling back to hardcoded clients.");
+            return createFallbackClients();
+        }
+        
+        for (Map.Entry<String, OAuth2ClientProperties.ClientConfig> entry : clientConfigs.entrySet()) {
+            String clientName = entry.getKey();
+            OAuth2ClientProperties.ClientConfig clientConfig = entry.getValue();
+            
+            logger.info("Registering OAuth2 client: {} with grant types: {}", clientName, clientConfig.getAuthorizationGrantTypes());
+            
+            RegisteredClient.Builder clientBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId(clientConfig.getClientId())
+                .clientSecret(passwordEncoder().encode(getClientSecret(clientName)))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
+            
+            // Add authorization grant types from configuration
+            for (String grantType : clientConfig.getAuthorizationGrantTypes()) {
+                switch (grantType.toLowerCase()) {
+                    case "authorization_code":
+                        clientBuilder.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
+                        break;
+                    case "client_credentials":
+                        clientBuilder.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS);
+                        break;
+                    case "password":
+                        clientBuilder.authorizationGrantType(AuthorizationGrantType.PASSWORD);
+                        break;
+                    case "refresh_token":
+                        clientBuilder.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN);
+                        break;
+                    default:
+                        logger.warn("Unknown grant type: {} for client: {}", grantType, clientName);
+                }
+            }
+            
+            // Add scopes from configuration
+            for (String scope : clientConfig.getScopes()) {
+                clientBuilder.scope(scope);
+            }
+            
+            // Add redirect URIs - combine from application.yml and our ServerProperties
+            List<String> redirectUris = new ArrayList<>();
+            if (clientConfig.getRedirectUris() != null) {
+                redirectUris.addAll(clientConfig.getRedirectUris());
+            }
+            
+            // Add additional redirect URIs from our ServerProperties for specific clients
+            if ("web-client".equals(clientName)) {
+                redirectUris.addAll(serverProperties.getWebClientRedirectUris());
+            } else if ("mobile-client".equals(clientName)) {
+                redirectUris.addAll(serverProperties.getMobileClientRedirectUris());
+            }
+            
+            // Remove duplicates and add to client
+            redirectUris.stream().distinct().forEach(clientBuilder::redirectUri);
+            
+            // Configure token settings
+            clientBuilder.tokenSettings(TokenSettings.builder()
+                .accessTokenTimeToLive(Duration.ofMinutes(tokenProperties.getAccessTokenExpirationMinutesForClient(clientName)))
+                .refreshTokenTimeToLive(Duration.ofDays(tokenProperties.getRefreshTokenExpirationDaysForClient(clientName)))
+                .reuseRefreshTokens(false)
+                .build());
+            
+            // Configure client settings
+            clientBuilder.clientSettings(ClientSettings.builder()
+                .requireAuthorizationConsent(false)
+                .requireProofKey(false)
+                .build());
+            
+            clients.add(clientBuilder.build());
+            logger.info("Successfully registered client: {} with {} redirect URIs", clientName, redirectUris.size());
+        }
+        
+        logger.info("Registered {} OAuth2 clients dynamically from application.yml", clients.size());
+        return new InMemoryRegisteredClientRepository(clients);
+    }
+    
+    /**
+     * Get client secret based on client name.
+     * This maps client names to their secrets for encoding.
+     */
+    private String getClientSecret(String clientName) {
+        switch (clientName) {
+            case "api-client":
+                return "api-secret";
+            case "web-client":
+                return "web-secret";
+            case "mobile-client":
+                return "mobile-secret";
+            default:
+                logger.warn("Unknown client: {}, using default secret", clientName);
+                return "default-secret";
+        }
+    }
+    
+    /**
+     * Fallback method to create hardcoded clients if configuration loading fails.
+     */
+    private RegisteredClientRepository createFallbackClients() {
+        logger.info("Creating fallback hardcoded clients");
+        
         // API Client for Client Credentials Grant
         RegisteredClient apiClient = RegisteredClient.withId(UUID.randomUUID().toString())
             .clientId("api-client")
             .clientSecret(passwordEncoder().encode("api-secret"))
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
             .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
             .scope("read")
@@ -121,66 +235,7 @@ public class AuthorizationServerConfig {
                 .build())
             .build();
 
-        // Web Client for Authorization Code Grant
-        RegisteredClient.Builder webClientBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
-            .clientId("web-client")
-            .clientSecret(passwordEncoder().encode("web-secret"))
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN);
-        
-        // Add redirect URIs from configuration
-        for (String redirectUri : serverProperties.getWebClientRedirectUris()) {
-            webClientBuilder.redirectUri(redirectUri);
-        }
-        
-        RegisteredClient webClient = webClientBuilder
-            .scope(OidcScopes.OPENID)
-            .scope(OidcScopes.PROFILE)
-            .scope(OidcScopes.EMAIL)
-            .scope("read")
-            .scope("write")
-            .tokenSettings(TokenSettings.builder()
-                .accessTokenTimeToLive(Duration.ofMinutes(tokenProperties.getAccessTokenExpirationMinutesForClient("web-client")))
-                .refreshTokenTimeToLive(Duration.ofDays(tokenProperties.getRefreshTokenExpirationDaysForClient("web-client")))
-                .reuseRefreshTokens(false)
-                .build())
-            .clientSettings(ClientSettings.builder()
-                .requireAuthorizationConsent(false)
-                .requireProofKey(false)
-                .build())
-            .build();
-
-        // Mobile Client for Resource Owner Password Credentials Grant
-        RegisteredClient.Builder mobileClientBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
-            .clientId("mobile-client")
-            .clientSecret(passwordEncoder().encode("mobile-secret"))
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-            .authorizationGrantType(AuthorizationGrantType.PASSWORD)
-            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN);
-        
-        // Add redirect URIs from configuration for mobile client
-        for (String redirectUri : serverProperties.getMobileClientRedirectUris()) {
-            mobileClientBuilder.redirectUri(redirectUri);
-        }
-        
-        RegisteredClient mobileClient = mobileClientBuilder
-            .scope("read")
-            .scope("write")
-            .scope(OidcScopes.OPENID)
-            .scope(OidcScopes.PROFILE)
-            .tokenSettings(TokenSettings.builder()
-                .accessTokenTimeToLive(Duration.ofMinutes(tokenProperties.getAccessTokenExpirationMinutesForClient("mobile-client")))
-                .refreshTokenTimeToLive(Duration.ofDays(tokenProperties.getRefreshTokenExpirationDaysForClient("mobile-client")))
-                .reuseRefreshTokens(false)
-                .build())
-            .clientSettings(ClientSettings.builder()
-                .requireAuthorizationConsent(false)
-                .build())
-            .build();
-
-        logger.info("Registered OAuth2 clients: API Client, Web Client, Mobile Client");
-        return new InMemoryRegisteredClientRepository(apiClient, webClient, mobileClient);
+        return new InMemoryRegisteredClientRepository(apiClient);
     }
 
     @Bean
