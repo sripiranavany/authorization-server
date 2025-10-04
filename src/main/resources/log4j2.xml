@@ -2,7 +2,7 @@
 <Configuration status="WARN">
     <Properties>
         <!-- Log file locations -->
-        <Property name="LOG_DIR">/hms/logs/authorization-server</Property>
+        <Property name="LOG_DIR">hms/logs/authorization-server</Property>
         <Property name="DEBUG_LOG_FILE">authorization-server-debug.log</Property>
         <Property name="AUDIT_LOG_FILE">authorization-server-audit.log</Property>
         
