@@ -34,4 +34,4 @@ jobs:
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
-      uses: github/dependency-submission-action@v4
+      uses: github/submit-dependency-graph-action@v4
