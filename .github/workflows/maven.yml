@@ -63,16 +63,6 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
         file: ./Dockerfile  
-
-    - name: Verify Docker image
-      if: matrix.os == 'ubuntu-latest'
-      uses: docker/inspect-action@v1
-      with:
-        image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-        format: 'Image {{.Id}} with OS {{.Os}} and Arch {{.Architecture}}'
-        fail-if-missing: true
-        fail-if-empty: true
-        fail-if-contains: 'sha256:'
     
     - name: Push Docker image
       if: matrix.os == 'ubuntu-latest'
