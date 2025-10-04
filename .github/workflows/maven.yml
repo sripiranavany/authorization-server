@@ -14,10 +14,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
-# permissions:
-#   contents: write
-#   actions: read
-#   security-events: write
+permissions:
+  # contents: write
+  actions: read
+  security-events: write
 #   id-token: write
 
 jobs:
